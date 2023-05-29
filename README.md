@@ -1,23 +1,36 @@
 # Maximum Fair Clique
-The code implementation about Efficient Algorithms for Maximum Fair Clique Search over Large Graphs.
 
-本篇论文基于Clique提出了一个新的二属性图的高阶子图模型——Relative Fair Clique。本文致力于求出大型图中的Maximum Fair Clique。
+This paper proposes a new high-order subgraph model for a binary attribute graph, the Relative Fair Clique, based on the concept of a Clique. The purpose of this paper is to find the Maximum Fair Clique in large graphs.
 
-## Code Construction
-程序分为X个部分，具体如下：
+## Code Structure
 
-**Graph.h:** Graph类的头文件。
+The code structure can be listed as follows.
 
-**Graph_reduction.cpp:** 本文件含有多种归约图的方法，包括论文中的算法1、2，及其enhanced方法；K-core算法。
+**Timer.h:** Timer class, used for counting the program running time.
 
-**Graph_heuristic.cpp:** 本文件为求解Maximum Fair Clique的启发式算法，对应论文的算法7-9。
+**Utility.h:** Utility class, used for operating strings.
 
-**Graph_utils.cpp:** 主要为与处理图相关的接口，如预处理、输出当前图，图存储空间回收、染色等。
+**LinearHeap.h:** It is a linear heap that can both insert and check the smallest number in the heap in $O(1)$ time complexity.
 
-**Graph_ub.cpp:** 用于准确计算Maximum Fair Clique时的upper bounding technology。
+**Graph.h:** The header file of Graph class.
 
-## How to Use It
+**Graph_reduction.cpp:** This file contains several methods for graph reduction, including Algorithms 1 and 2 in the paper, and their enhanced methods, as well as the K-core algorithm.
 
-**编译命令：** g++ -std=c++11 -w main.cpp Graph_utils.cpp Graph_reduction.cpp Graph_heuristic.cpp -o main
+**Graph_heuristic.cpp:** This file provides heuristic algorithms for finding the Maximum Fair Clique, corresponding to Algorithms 7-9 in the paper.
 
-**运行命令：** ./main path/to/Graph.txt path/to/attribute.txt threshold delta
+**Graph_utils.cpp:** This mainly includes interfaces for processing graphs, such as preprocessing, outputting the current graph, recycling graph storage space, coloring, etc.
+
+**Graph_ub.cpp:** This is used for accurately calculating the Maximum Fair Clique using upper bounding technology.
+
+**Graph_baseline.cpp:** This is the precise algorithm for calculating the Maximum Fair Clique (Branch-and-bound solution).
+
+**main.cpp:** The main program.
+
+
+
+## How to Run the Code
+
+**Compile command: ** ```make```
+
+**Running command: **```./main path/to/Graph.txt path/to/attribute.txt threshold delta```
+
