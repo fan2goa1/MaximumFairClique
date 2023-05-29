@@ -24,7 +24,12 @@ int main(int argc, char *argv[]){
     graph -> Node_Contraction();        // 缩图
     graph -> reColor();                 // 重新染色
     int ub = graph -> Find_MRFC_Heuristic();     // 启发式算法找MRFC
-    printf("upper bound of the MRFC is %d\n", ub);
+    printf("upper bound of the MRFC is %d\n\n", ub);
+
+    puts("Start searching real MRFC...");   // ub technology
+    graph -> MaxRFClique();
+    graph -> printMRFC_real();
+    
 
     printf("tot time: %s (microseconds)\n", Utility::integer_to_string(tt.elapsed()).c_str());
     return 0;
