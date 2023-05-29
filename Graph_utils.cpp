@@ -337,3 +337,97 @@ void Graph::get_colorful_attr_degree(){
     if(colorful_r != nullptr) delete[] colorful_r;
     return ;
 }
+// 求出连通分量的Colorful Degree Ordering
+vector<int> Graph::GetColorfulOrdering(){
+    int* vis = new int[n];
+    for(int i = 0; i < n; i ++) vis[i]=0;
+    for(int i = 0; i < component.size(); i ++) vis[component[i]] = 1;
+
+    int*** d;//fairness degree
+    int** r;
+
+    int* min_d;//minimum among all attributes
+    int* component_idx = new int[n];
+    for(int i = 0; i < component.size(); i ++) component_idx[component[i]] = i;
+    min_d = new int[n];
+    for(int i = 0; i < n; i ++) min_d[i] = n;
+    r = new int* [component.size()];
+    for(int i = 0; i < component.size(); i ++){
+        r[i] = new int[attr_size];
+        for(int j = 0; j < attr_size; j ++)
+            r[i][j] = 0;
+    }
+    d = new int** [component.size()];
+    for(int i = 0; i < component.size(); i ++){
+        d[i] = new int*[attr_size];
+        for(int j = 0; j < attr_size; j ++){
+            d[i][j] = new int [max_color];
+            for(int k = 0; k < max_color; k ++)
+                d[i][j][k] = 0;
+        }
+    }
+
+    for(int i = 0; i < component.size(); i ++){
+        int cnow = component[i];
+        for(int j = offset[cnow]; j < pend[cnow]; j ++){
+            int nei = edge_list[j];
+            if(vis[nei] == 1)   // 在当前这个连通分量中
+                if((d[i][attribute[nei]][color[nei]] ++) == 0)
+                    r[i][attribute[nei]] ++;
+        }
+
+        for(int j = 0; j < attr_size; j ++){
+            if(r[i][j] < min_d[i]) min_d[i] = r[i][j];
+        }
+    }
+
+    int* degree_arr = new int[component.size()];
+
+    for(int i = 0; i < component.size(); i ++) degree_arr[i] = min_d[i];
+    int* ordered_c = new int[component.size()];
+    for(int i = 0; i < component.size(); i ++) ordered_c[i] = i;
+    int cnt = 0;
+
+    ListLinearHeap *heap = new ListLinearHeap(component.size(), component.size(), n);
+    heap -> init(component.size(), component.size(), ordered_c, degree_arr);
+    vector<int> peeling_order;peeling_order.clear();
+    for(int i = 0; i < component.size(); i ++){
+        int nod, key;
+        heap -> pop_min(nod, key);
+        nod = component[nod];
+        //printf("nod=%d, key=%d\n", nod, key);
+        peeling_order.push_back(nod);
+        vis[nod] = 0;
+        for(int j = offset[nod]; j < pend[nod]; j ++){
+            if(vis[edge_list[j]] == 1){
+                int idx = component_idx[edge_list[j]];
+                if(-- d[idx][attribute[nod]][color[nod]] <= 0){
+                    r[idx][attribute[nod]] --;
+                    if(min_d[idx] > r[idx][attribute[nod]]){
+                        int off = min_d[idx] - r[idx][attribute[nod]];
+                        min_d[idx] = r[idx][attribute[nod]];
+                        heap -> decrement(idx, off);  // O(1)时间
+                    }
+                }
+            }
+        }
+    }
+
+    if(d != nullptr) delete[] d;
+    if(r != nullptr) delete[] r;
+    if(min_d != nullptr) delete[] min_d;
+    if(vis != nullptr) delete[] vis;
+    if(component_idx != nullptr) delete[] component_idx;
+    if(degree_arr != nullptr) delete[] degree_arr;
+    if(ordered_c != nullptr) delete[] ordered_c;    
+
+    return peeling_order;
+}
+
+void Graph::printMRFC_real(){
+    printf("The size of real MRFC: %d\n", MRFC_real.size());
+    for(auto u : MRFC_real){
+        printf("%d ", to_old_node[u]);
+    } puts("");
+    return ;
+}
