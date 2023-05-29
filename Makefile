@@ -8,6 +8,7 @@ headers = Graph.h Utility.h Timer.h LinearHeap.h
 
 # compiler config
 CC = g++ -std=c++11 -w
+OPT = -o2
 
 all: main
 .PHONY: all clean
