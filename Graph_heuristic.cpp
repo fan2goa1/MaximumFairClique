@@ -142,20 +142,20 @@ void Graph::Colorful_Degree_Heuristic(){
 }
 
 void Graph::HeuBranch(vector<int>& R, vector<int>* C, int* r_attr, int tar_attr, int a_min, string type){
-    if(R.size() + C[0].size() + C[1].size() <= MRFC.size()) return;  // 说明当前搜索到的结果已经不可能比当前最优解更优了
+    if(R.size() + C[0].size() + C[1].size() <= MRFC_heu.size()) return;  // 说明当前搜索到的结果已经不可能比当前最优解更优了
     if(C[0].size() + C[1].size() == 0){         // 此时候选集为空，搜索到底
-        if(R.size() > MRFC.size()){
-            MRFC = R;
-            cout << "Find a new MRFC with size " << MRFC.size() << endl;
-            for(auto u : MRFC) cout << u << " "; puts("");
+        if(R.size() > MRFC_heu.size()){
+            MRFC_heu = R;
+            cout << "Find a new MRFC with size " << MRFC_heu.size() << endl;
+            for(auto u : MRFC_heu) cout << to_old_node[u] << " "; puts("");
         }
         return;
     }
     if(a_min != -1 && r_attr[tar_attr] == a_min + delta){       // 说明加到上限不能再加了
-        if(R.size() > MRFC.size()){
-            MRFC = R;
-            cout << "Find a new MRFC with size " << MRFC.size() << endl;
-            for(auto u : MRFC) cout << u << " "; puts("");
+        if(R.size() > MRFC_heu.size()){
+            MRFC_heu = R;
+            cout << "Find a new MRFC with size " << MRFC_heu.size() << endl;
+            for(auto u : MRFC_heu) cout << to_old_node[u] << " "; puts("");
         }
         return ;
     }
@@ -234,18 +234,18 @@ int Graph::Find_MRFC_Heuristic(){
     Degree_Heuristic();             // 找到用度数排序得到的当前MRFC
     int* cnt = new int[2];
     cnt[0] = cnt[1] = 0;
-    for(auto u : MRFC) cnt[attribute[u]] ++;
-    int k_star = max(cnt[0], cnt[1]) - delta;
+    for(auto u : MRFC_heu) cnt[attribute[u]] ++;
+    int k_star = max(0, max(cnt[0], cnt[1]) - delta);
     
     K_Core_Reduction(k_star);         // 计算K-Core
     Node_Contraction();
     printf("k_star: %d\n", k_star);
 
-    vector<int> now_MRFC = MRFC;
+    vector<int> now_MRFC = MRFC_heu;
     Colorful_Degree_Heuristic();    // 再用Colorful degree排序试找更大的MRFC
-    if(MRFC.size() > now_MRFC.size()){  // 说明找到了更大的MRFC
+    if(MRFC_heu.size() > now_MRFC.size()){  // 说明找到了更大的MRFC
         cnt[0] = cnt[1] = 0;
-        for(auto u : MRFC) cnt[attribute[u]] ++;
+        for(auto u : MRFC_heu) cnt[attribute[u]] ++;
         int k_cast = max(cnt[0], cnt[1]) - delta;
         K_Core_Reduction(k_cast);         // 计算K-Core
         Node_Contraction();
