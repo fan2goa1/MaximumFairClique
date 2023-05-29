@@ -30,7 +30,7 @@ The code structure can be listed as follows.
 
 ## How to Run the Code
 
-**Compile command: ** ```make```
+**Compile command:** ```make```
 
-**Running command: **```./main path/to/Graph.txt path/to/attribute.txt threshold delta```
+**Running command:** ```./main path/to/Graph.txt path/to/attribute.txt threshold delta```
 
