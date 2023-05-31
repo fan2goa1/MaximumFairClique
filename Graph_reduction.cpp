@@ -173,7 +173,10 @@ void Graph::Colorful_Support_Reduction(){
         }
     }
 
-    set<int> edge_set[2];
+    // set<int> edge_set[2];
+    int** edge_set = new int* [2];
+    int scnt0 = 0, scnt1 = 0;
+    for(int i = 0; i < attr_size; i ++) edge_set[i] = new int [n];
     // 计算colorful_d和colorful_r
     for(int i = 0; i < n; i ++){
         if(node_cut[i]) continue;
@@ -183,25 +186,31 @@ void Graph::Colorful_Support_Reduction(){
             // printf("%d %d\n", u, v);
             if(u > v) continue;     // 只枚举u<v的情况，防止重复枚举
             // printf("<%d, %d>\n", u, v);
-            edge_set[0].clear(); edge_set[1].clear();
+            // edge_set[0].clear(); edge_set[1].clear();
+            scnt0 = scnt1 = 0;
             for(int k = offset[u]; k < pend[u]; k ++){
                 int w = edge_list[k];
                 if(w <= u || w <= v || node_cut[w]) continue;
-                edge_set[0].insert(w);
+                // edge_set[0].insert(w);
+                edge_set[0][scnt0 ++] = w;
             }
             for(int k = offset[v]; k < pend[v]; k ++){
                 int w = edge_list[k];
                 if(w <= u || w <= v || node_cut[w]) continue;
-                edge_set[1].insert(w);
+                // edge_set[1].insert(w);
+                edge_set[1][scnt1 ++] = w;
             }
-            set<int> common_neighbor = intersection(edge_set[0], edge_set[1]); // 求交集
+            // set<int> common_neighbor = intersection(edge_set[0], edge_set[1]); // 求交集
+            int* common_neighbor = new int [n];
+            int common_size = calc_intersection(edge_set, scnt0, scnt1, common_neighbor);
             // 找到的w都是u < v < w，保证每个三角形只被枚举一次
             #ifdef DEBUG
                 printf("<%d, %d> common_neighbor: ", u, v);
                 for(auto w: common_neighbor) printf("%d ", w);
                 printf("\n");
             #endif
-            for(auto w: common_neighbor){
+            for(int ll = 0; ll < common_size; ll ++){
+                int w = common_neighbor[ll];
                 // 计算Alg 2的5-6行
                 if(colorful_r[j][attribute[w]][color[w]] == 0){
                     colorful_d[j][attribute[w]] ++;
@@ -221,6 +230,7 @@ void Graph::Colorful_Support_Reduction(){
                 colorful_r[j_vw][attribute[u]][color[u]] ++;
 
             }
+            if(common_neighbor != nullptr) delete[] common_neighbor;
         }
     }
 
@@ -263,17 +273,23 @@ void Graph::Colorful_Support_Reduction(){
         int u = qedge.first, v = edge_list[qedge.second];
         int u1, v1, w1;
         edge_cut[qedge.second] = edge_cut[unordered_edge[v][u]] = 1;
-        edge_set[0].clear(); edge_set[1].clear();
+        // edge_set[0].clear(); edge_set[1].clear();
+        scnt0 = scnt1 = 0;
         for(int k = offset[u]; k < pend[u]; k ++){
             if(edge_cut[k]) continue;
-            edge_set[0].insert(edge_list[k]);
+            // edge_set[0].insert(edge_list[k]);
+            edge_set[0][scnt0 ++] = edge_list[k];
         }
         for(int k = offset[v]; k < pend[v]; k ++){
             if(edge_cut[k]) continue;
-            edge_set[1].insert(edge_list[k]);
+            // edge_set[1].insert(edge_list[k]);
+            edge_set[1][scnt1 ++] = edge_list[k];
         }
-        set<int> common_neighbor = intersection(edge_set[0], edge_set[1]); // 求交集
-        for(auto w: common_neighbor){
+        // set<int> common_neighbor = intersection(edge_set[0], edge_set[1]); // 求交集
+        int* common_neighbor = new int [n];
+        int common_size = calc_intersection(edge_set, scnt0, scnt1, common_neighbor);
+        for(int ll = 0; ll < common_size; ll ++){
+            int w = common_neighbor[ll];
             if(node_cut[w]){
                 continue;
             }
@@ -330,7 +346,10 @@ void Graph::Colorful_Support_Reduction(){
                 }
             }
         }
+        delete[] common_neighbor;
     }
+    for(int i = 0; i < attr_size; i ++) delete[] edge_set[i];
+    delete[] edge_set;
     if(colorful_r != nullptr){
         for(int i = 0; i < m; i++) {
             for(int j = 0; j < attr_size; j++) {
@@ -529,7 +548,11 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
     int* edge_cut = new int [m];
     for(int i = 0; i < m; i ++) edge_cut[i] = 0;
     
-    set<int> edge_set[2];
+    // set<int> edge_set[2];
+    int** edge_set = new int* [2];
+    int scnt0 = 0, scnt1 = 0;
+    for(int i = 0; i < attr_size; i ++) edge_set[i] = new int [n];
+    
     unordered_edge.clear();
     // 把每个点的连边装到set里用于求交集, 初始化unordered_edge
     for(int i = 0; i < n; i ++){
@@ -549,24 +572,31 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
             // printf("%d %d\n", u, v);
             if(u >= v) continue;     // 只枚举u<v的情况，防止重复枚举
             // 枚举 u < v < w 的三角形，一个三角形只被枚举一次，贡献三次
-            edge_set[0].clear(); edge_set[1].clear();
+            // edge_set[0].clear(); edge_set[1].clear();
+            scnt0 = scnt1 = 0;
             for(int k = offset[u]; k < pend[u]; k ++){
                 int w = edge_list[k];
                 if(node_cut[w] || w <= u || w <= v) continue;
-                edge_set[0].insert(w);
+                // edge_set[0].insert(w);
+                edge_set[0][scnt0 ++] = w;
             }
             for(int k = offset[v]; k < pend[v]; k ++){
                 int w = edge_list[k];
                 if(node_cut[w] || w <= u || w <= v) continue;
-                edge_set[1].insert(w);
+                // edge_set[1].insert(w);
+                edge_set[1][scnt1 ++] = w;
             }
-            set<int> common_neighbor = intersection(edge_set[0], edge_set[1]); // 求交集
-            for(auto w: common_neighbor){
+            // set<int> common_neighbor = intersection(edge_set[0], edge_set[1]); // 求交集
+            int* common_neighbor = new int [n];
+            int common_size = calc_intersection(edge_set, scnt0, scnt1, common_neighbor);
+            for(int ll = 0; ll < common_size; ll ++){
+                int w = common_neighbor[ll];
                 cntGroup[j][color[w]][attribute[w]] ++;
                 int j_uw = unordered_edge[u][w], j_vw = unordered_edge[v][w];
                 cntGroup[j_uw][color[v]][attribute[v]] ++;
                 cntGroup[j_vw][color[u]][attribute[u]] ++;
             }
+            if(common_neighbor != nullptr) delete[] common_neighbor;
         }
     }
     // 将不达标的ED放入队列Q
@@ -606,18 +636,24 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
         
         edge_cut[qedge.second] = edge_cut[unordered_edge[v][u]] = 1;    // 将删边标记置为1
 
-        edge_set[0].clear(); edge_set[1].clear();
+        // edge_set[0].clear(); edge_set[1].clear();
+        scnt0 = scnt1 = 0;
         for(int k = offset[u]; k < pend[u]; k ++){
             if(edge_cut[k]) continue;
-            edge_set[0].insert(edge_list[k]);
+            // edge_set[0].insert(edge_list[k]);
+            edge_set[0][scnt0 ++] = edge_list[k];
         }
         for(int k = offset[v]; k < pend[v]; k ++){
             if(edge_cut[k]) continue;
-            edge_set[1].insert(edge_list[k]);
+            // edge_set[1].insert(edge_list[k]);
+            edge_set[1][scnt1 ++] = edge_list[k];
         }       
        
-        set<int> common_neighbor = intersection(edge_set[0], edge_set[1]); // 求交集
-        for(auto w: common_neighbor){       // 枚举公共邻居
+        // set<int> common_neighbor = intersection(edge_set[0], edge_set[1]); // 求交集
+        int* common_neighbor = new int [n];
+        int common_size = calc_intersection(edge_set, scnt0, scnt1, common_neighbor);
+        for(int ll = 0; ll < common_size; ll ++){       // 枚举公共邻居
+            int w = common_neighbor[ll];
             if(node_cut[w]){
                 continue;
             }
@@ -667,8 +703,11 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
                 }
             }
         }
+        if(common_neighbor != nullptr) delete[] common_neighbor;
     }
-
+    for(int i = 0; i < attr_size; i ++) delete[] edge_set[i];
+    delete[] edge_set;
+    
     if(cntGroup != nullptr){
         for(int i = 0; i < m; i++) {
             for(int j = 0; j < max_color; j++) {
