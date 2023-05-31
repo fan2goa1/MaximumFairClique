@@ -45,6 +45,7 @@ class Graph{
     void get_colorful_attr_degree();
     vector<int> GetColorfulOrdering();
     void printMRFC_real();
+    int calc_intersection(int**, int, int, int*);
 
     // in Graph_reduction.cpp
     void Colorful_Degree_Reduction();
@@ -66,6 +67,7 @@ class Graph{
     int ub_color(vector<int> &, vector<int>*);         // 求Color based upper bound
     int ub_attr(vector<int> &, vector<int>*);          // 求Attribute based upper bound
     int ub_attr_color(vector<int> &, vector<int>*, vector<int> *);    // 求Attribute color based upper bound
+    int ub_new(vector<int> &, vector<int>*);             // 求New based upper bound
     int ub_degeneracy(vector<int> &, vector<int>*, int*);    // 求Degeneracy based upper bound
     int ub_color_degeneracy(vector<int> &, vector<int>*, int*);  // 求Color degeneracy based upper bound
     int ub_h_index(vector<int>*, int*);       // 求H-index based upper bound
