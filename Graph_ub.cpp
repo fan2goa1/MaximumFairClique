@@ -10,6 +10,7 @@ bool Graph::calc_ub(vector<int> &R, vector<int>* C){
     if(ub_size(R, C) <= min_ub) return false;
     if(ub_color(R, C) <= min_ub) return false;
     if(ub_attr(R, C) <= min_ub) return false;
+    if(ub_new(R, C) <= min_ub) return false;
     // cout << ub_size(R,C) << " " << ub_color(R,C) << " " << ub_attr(R,C) << endl;
 
     vector<int>* Sub = new vector<int> [2];         // 分别为R C中属性为0/1的子图的点
@@ -17,6 +18,8 @@ bool Graph::calc_ub(vector<int> &R, vector<int>* C){
         delete [] Sub;
         return false;
     }
+    delete[] Sub;
+    return true;
     
     // // 构建属性子图需要用到的东西
     int* deg_arr = new int [n];         // Ga/Gb中的点的度数
@@ -154,8 +157,38 @@ int Graph::ub_attr_color(vector<int> &R, vector<int>* C, vector<int>* Sub){
     if(color_b != nullptr) delete[] color_b;
     return ub;
 }
+// 5.求new UB
+int Graph::ub_new(vector<int> &R, vector<int>* C){
+    int* color_a = new int [max_color];
+    int* color_b = new int [max_color];
+    for(int i = 0; i < max_color; i ++) color_a[i] = color_b[i] = 0;
+    for(auto u : R){
+        if(attribute[u] == 0) color_a[color[u]] = 1;
+        else color_b[color[u]] = 1;
+    }
+    for(auto u : C[0]) color_a[color[u]] = 1;
+    for(auto u : C[1]) color_b[color[u]] = 1;
 
-// 5.求Degeneracy based upper bound
+    int cnta = 0, cntb = 0, mix = 0;
+    for(int i = 0; i < max_color; i ++){
+        if(color_a[i] == 1 && color_b[i] == 1){     // mix类型的color
+            mix ++;
+        }
+        else if(color_a[i] == 1) cnta ++;
+        else if(color_b[i] == 1){
+            // assert(color_a[i] == 0);
+            // assert(color_b[i] == 1);
+            cntb ++;
+        }
+    }
+    if(color_a != nullptr) delete[] color_a;
+    if(color_b != nullptr) delete[] color_b;
+
+    int ub = cnta + cntb + mix;
+    return ub;
+}
+
+// 6.求Degeneracy based upper bound
 int Graph::ub_degeneracy(vector<int> &R, vector<int>* C, int* degree_arr){
     int sigma[2]; sigma[0] = sigma[1] = 0;
     int totn = 0;
@@ -212,7 +245,7 @@ int Graph::ub_degeneracy(vector<int> &R, vector<int>* C, int* degree_arr){
 
     return ub;
 }
-
+// 7.colorful Degeneracy based upper bound
 int Graph::ub_color_degeneracy(vector<int> &R, vector<int>* C, int* degree_arr){
     int sigma[2]; sigma[0] = sigma[1] = 0;
     int totn = 0;
@@ -292,7 +325,7 @@ int Graph::ub_color_degeneracy(vector<int> &R, vector<int>* C, int* degree_arr){
 
     return ub;
 }
-
+// 8.求H-index based upper bound
 int Graph::ub_h_index(vector<int>* Sub, int* degree_arr){
     int h[2]; h[0] = h[1] = 0;
     int* buc_cnt = new int [n];     // buc_cnt[i]表示degree=i的点的个数
@@ -317,7 +350,7 @@ int Graph::ub_h_index(vector<int>* Sub, int* degree_arr){
     // cout << ub << " " << Sub[0].size() << " " << Sub[1].size()<< endl;
     return ub;
 }
-
+// 9.求Colorful H-index based upper bound
 int Graph::ub_color_h_index(vector<int>* Sub, int* degree_arr){
     int h[2]; h[0] = h[1] = 0;
     int* buc_cnt = new int [n];     // buc_cnt[i]表示degree=i的点的个数
@@ -339,7 +372,7 @@ int Graph::ub_color_h_index(vector<int>* Sub, int* degree_arr){
     int ub = 2*min(h[0]+1, h[1]+1) + delta;
     return ub;
 }
-// 求colorful_path的上界
+// 10.求colorful_path的上界
 int Graph::ub_colorful_path(vector<int>* Sub){
     int* f = new int [n];
     // 先分开考虑两个属性
