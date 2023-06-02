@@ -161,8 +161,8 @@ void Graph::HeuBranch(vector<int>& R, vector<int>* C, int* r_attr, int tar_attr,
     }
 
     if(C[tar_attr].size() == 0){        // 当前要找的属性的候选集为空，说明要找的属性已经找完了，转而找另一个属性
-        tar_attr = 1 - tar_attr;
         a_min = r_attr[tar_attr];       // 设置属性个数的下限，上限a_max = a_min + delta
+        tar_attr = 1 - tar_attr;
         HeuBranch(R, C, r_attr, tar_attr, a_min, type);
         return ;
     }
@@ -232,6 +232,7 @@ void Graph::HeuBranch(vector<int>& R, vector<int>* C, int* r_attr, int tar_attr,
 // Alg9 Heuristic Framework
 int Graph::Find_MRFC_Heuristic(){
     Degree_Heuristic();             // 找到用度数排序得到的当前MRFC
+
     int* cnt = new int[2];
     cnt[0] = cnt[1] = 0;
     for(auto u : MRFC_heu) cnt[attribute[u]] ++;
@@ -252,6 +253,7 @@ int Graph::Find_MRFC_Heuristic(){
         reColor();
     }
     int ub = max_color;
+    have_ans = 1;
     delete[] cnt;
 
     return ub;
