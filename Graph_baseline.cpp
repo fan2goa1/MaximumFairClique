@@ -5,7 +5,20 @@
 
 using namespace std;
 
-void Graph::MaxRFClique(){  
+// 只记录<u, v>(u<v)的边
+void Graph::update_map(){
+    unordered_edge.clear();
+    for(int u = 0; u < n; u ++){
+        for(int i = offset[u]; i < pend[u]; i ++){
+            int v = edge_list[i]; if(v <= u) continue;
+            unordered_edge[u][v] = 1;
+        }
+    }
+    return ;
+}
+
+void Graph::MaxRFClique(){
+    update_map();
     for(auto u : MRFC_heu) MRFC_real.push_back(u);      // 用于存储真正的MRFC
     int* vis = new int[n];
     nvis = new int[n];
