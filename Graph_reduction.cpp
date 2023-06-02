@@ -516,18 +516,21 @@ void Graph::Enhanced_Colorful_Degree_Reduction(){
     m = startpos;           // 更新边数
     offset[n] = pend[n] = 0;                // n的offset和pend也置为0
 
-    printf("Enhanced Colorful Degree Reduction done!\n");
+    cout << "Enhanced Colorful Degree Reduction done!" << endl;
+    cout.flush();
     return ;
 }
 
 void Graph::Enhanced_Colorful_Support_Reduction(){
-    printf("Start Enhanced Colorful Support Reduction...\n");
+    cout << "Start Enhanced Colorful Support Reduction..." << endl;
+    cout.flush();
 
     if(!preprocessed){Preprocess(); preprocessed = 1;}
     // Node_Contraction();
 
     if(!n || !m){
-        printf("Graph is empty!\n");
+        cout << "Graph is empty!" << endl;
+        cout.flush();
         return ;
     }
 
@@ -707,7 +710,7 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
     }
     for(int i = 0; i < attr_size; i ++) delete[] edge_set[i];
     delete[] edge_set;
-    
+
     if(cntGroup != nullptr){
         for(int i = 0; i < m; i++) {
             for(int j = 0; j < max_color; j++) {
