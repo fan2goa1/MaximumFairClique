@@ -32,5 +32,11 @@ The code structure can be listed as follows.
 
 **Compile command:** ```make```
 
-**Running command:** ```./main path/to/Graph.txt path/to/attribute.txt threshold delta```
+  In the present study, we employ three distinct algorithms: the Baseline Algorithm, the Upper-Bounding Solution, and the Heuristic Algorithm.
+
+  For the application of the **Baseline Algorithm**, the ensuing command is necessitated: ```./main path/to/Graph.txt path/to/attribute.txt threshold delta base```
+
+  Conversely, to implement the **Upper-Bounding Solution**, the required command is as follows:```./main path/to/Graph.txt path/to/attribute.txt threshold delta ub```
+
+  Lastly, the **Heuristic Algorithm** can be activated via the succeeding command: ```./main path/to/Graph.txt path/to/attribute.txt threshold delta heur```
 
