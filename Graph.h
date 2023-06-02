@@ -12,6 +12,7 @@ class Graph{
     int delta;          // 输入中的delta
     int max_color;      // 对图染色的总颜色数
     int preprocessed;   // 0表示未对图进行染色
+    bool have_ans;      // 1表示已经找到答案
 
     int* offset;        // offset[i]表示第i个节点的所有边在edge_list中的起始位置
     int* pend;          // pend[i]表示第i个节点的所有边在edge_list中的终止位置
@@ -32,6 +33,7 @@ class Graph{
 
 
     public:
+    string alg_type;        // 记录是baseline还是ub还是heuristic
     // in Graph_utils.cpp
     Graph();
     ~Graph();
@@ -62,14 +64,15 @@ class Graph{
     int Find_MRFC_Heuristic();
 
     // in Graph_ub.cpp
-    bool calc_ub(vector<int> &, vector<int>*);         // 计算上界，并判断是否被剪枝
+    bool calc_base(vector<int> &, vector<int>*);        // baseline 计算上届
+    bool calc_ub(vector<int> &, vector<int>*);         // ub 计算上界，并判断是否被剪枝
     int ub_size(vector<int> &, vector<int>*);          // 求Size based upper bound
     int ub_color(vector<int> &, vector<int>*);         // 求Color based upper bound
     int ub_attr(vector<int> &, vector<int>*);          // 求Attribute based upper bound
     int ub_attr_color(vector<int> &, vector<int>*, vector<int> *);    // 求Attribute color based upper bound
     int ub_new(vector<int> &, vector<int>*);             // 求New based upper bound
-    int ub_degeneracy(vector<int> &, vector<int>*, int*);    // 求Degeneracy based upper bound
-    int ub_color_degeneracy(vector<int> &, vector<int>*, int*);  // 求Color degeneracy based upper bound
+    int ub_degeneracy(vector<int> &, vector<int>*, int*, int);    // 求Degeneracy based upper bound
+    int ub_color_degeneracy(vector<int> &, vector<int>*, int*, int);  // 求Color degeneracy based upper bound
     int ub_h_index(vector<int>*, int*);       // 求H-index based upper bound
     int ub_color_h_index(vector<int>*, int*); // 求Color H-index based upper bound
     int ub_colorful_path(vector<int>*); // 求Colorful path based upper bound
@@ -77,7 +80,8 @@ class Graph{
   
     // in Graph_baseline.cpp
     void MaxRFClique();
-    void Branch(vector<int>&, vector<int>*, int, vector<int>, vector<int>, int, int);
+    void Branch(vector<int>&, vector<int>*, int, vector<int>, int, int);
+    void Try_BestC(vector<int>&, vector<int>*, int);
 
     private:
     set<int> intersection(set<int> set_a, set<int> set_b) {
