@@ -28,17 +28,17 @@ Graph::~Graph(){
 
 void Graph::printGraph(){
     printf("<node num: %d   edge num: %d>\n", n, m);
-    printf("Left nodes: ");
-    for(int i = 0; i < n; i ++){
-        if(!node_cut[i]) printf("%d ", i);
-    } puts("");
-    printf("Edge list: ");
-    for(int i = 0; i < n; i ++){
-        if(node_cut[i]) continue;
-        for(int j = offset[i]; j < pend[i]; j ++){
-            printf("<%d, %d>, ", i, edge_list[j]);
-        }
-    } printf("Total: %d\n", m);
+    // printf("Left nodes: ");
+    // for(int i = 0; i < n; i ++){
+    //     if(!node_cut[i]) printf("%d ", i);
+    // } puts("");
+    // printf("Edge list: ");
+    // for(int i = 0; i < n; i ++){
+    //     if(node_cut[i]) continue;
+    //     for(int j = offset[i]; j < pend[i]; j ++){
+    //         printf("<%d, %d>, ", i, edge_list[j]);
+    //     }
+    // } printf("Total: %d\n", m);
 
     // for(int i = 0; i < n; i ++){
     //     printf("new: %d; old: %d\n", i, to_old_node[i]);
@@ -75,6 +75,7 @@ void Graph::check(){
 void Graph::ReadGraph(const char* inputname, const char* attr, int th, int _delta){
     threshold = th;
     delta = _delta;
+    have_ans = 0;
     printf("Start reading graph from %s\n", inputname);
     FILE *f = fopen(inputname, "r");
     if(f == nullptr){
@@ -430,4 +431,17 @@ void Graph::printMRFC_real(){
         printf("%d ", to_old_node[u]);
     } puts("");
     return ;
+}
+// 双指针法求
+int Graph::calc_intersection(int** edge_set, int scnt0, int scnt1, int* common_neighbor){
+    int l = 0, r = 0, totnum = 0;
+    while(l < scnt0 && r < scnt1){
+        while(edge_set[0][l] < edge_set[1][r] && l < scnt0) l ++;
+        while(edge_set[1][r] < edge_set[0][l] && r < scnt1) r ++;
+        if(l < scnt0 && r < scnt1 && edge_set[0][l] == edge_set[1][r]){
+            common_neighbor[totnum ++] = edge_set[0][l];
+            l ++; r ++;
+        }
+    }
+    return totnum;
 }
