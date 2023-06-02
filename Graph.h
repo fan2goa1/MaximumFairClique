@@ -75,13 +75,13 @@ class Graph{
     int ub_color_degeneracy(vector<int> &, vector<int>*, int*, int);  // 求Color degeneracy based upper bound
     int ub_h_index(vector<int>*, int*);       // 求H-index based upper bound
     int ub_color_h_index(vector<int>*, int*); // 求Color H-index based upper bound
-    int ub_colorful_path(vector<int>*); // 求Colorful path based upper bound
-    // int ub_colorful_triangle(vector<int>*); // 求Colorful triangle based upper bound
+    int ub_colorful_path(vector<int> &, vector<int>*); // 求Colorful path based upper bound
+    int ub_colorful_triangle(vector<int> &, vector<int>*); // 求Colorful triangle based upper bound
   
     // in Graph_baseline.cpp
+    void update_map();      // 更新unordered_edge
     void MaxRFClique();
     void Branch(vector<int>&, vector<int>*, int, vector<int>, int, int);
-    void Try_BestC(vector<int>&, vector<int>*, int);
 
     private:
     set<int> intersection(set<int> set_a, set<int> set_b) {
