@@ -16,6 +16,7 @@ int main(int argc, char *argv[]){
     // 读入图
     graph -> ReadGraph(argv[1], argv[2], atoi(argv[3]), atoi(argv[4]));
     // graph -> check();
+    cout << endl; cout.flush();
     graph -> Colorful_Degree_Reduction();
     graph -> Enhanced_Colorful_Degree_Reduction();
     graph -> reColor();         // 重新染色
@@ -27,10 +28,12 @@ int main(int argc, char *argv[]){
     graph -> reColor();                 // 重新染色
     cout << "After truss reduction: ";
     graph -> printGraph();
+    cout << endl; cout.flush();
 
-    
-    // int ub = graph -> Find_MRFC_Heuristic();     // 启发式算法找MRFC
-    // printf("upper bound of the MRFC is %d\n\n", ub);
+    if(graph -> alg_type == "heur"){
+        int ub = graph -> Find_MRFC_Heuristic();     // 启发式算法找MRFC
+        printf("upper bound of the MRFC is %d\n\n", ub);
+    }
 
     puts("Start searching real MRFC...");   // ub technology
     graph -> MaxRFClique();
