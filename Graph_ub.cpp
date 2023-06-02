@@ -75,19 +75,25 @@ bool Graph::calc_ub(vector<int> &R, vector<int>* C){
     //     delete[] color_deg_arr;
     //     return false;
     // }
-    // 先对Sub[0]和Sub[1]中的点按照颜色     ub10
-    // sort(Sub[0].begin(), Sub[0].end(), [&](int a, int b){return color[a] < color[b];});
-    // sort(Sub[1].begin(), Sub[1].end(), [&](int a, int b){return color[a] < color[b];});
-    // if(ub_colorful_path(Sub) <= min_ub){
+    // if(ub_colorful_path(R, C) <= min_ub){        // ub10
     //     for(auto u : R) RCvis[u] = 0;       
     //     for(auto u : C[0]) RCvis[u] = 0;
     //     for(auto u : C[1]) RCvis[u] = 0;
-    //     delete[] Sub;
-    //     delete[] deg_arr;
-    //     delete[] color_deg_arr;
+    //     // delete[] Sub;
+    //     // delete[] deg_arr;
+    //     // delete[] color_deg_arr;
     //     return false;
     // }
-    // /* recover */
+    // if(ub_colorful_triangle(R, C) <= min_ub){       // ub11
+    //     for(auto u : R) RCvis[u] = 0;       
+    //     for(auto u : C[0]) RCvis[u] = 0;
+    //     for(auto u : C[1]) RCvis[u] = 0;
+        // delete[] Sub;
+        // delete[] deg_arr;
+        // delete[] color_deg_arr;
+    //     return false;
+    // }
+    /* recover */
     // for(auto u : R) RCvis[u] = 0;       
     // for(auto u : C[0]) RCvis[u] = 0;
     // for(auto u : C[1]) RCvis[u] = 0;
@@ -400,48 +406,80 @@ int Graph::ub_color_h_index(vector<int>* Sub, int* degree_arr){
     return ub;
 }
 // 10.求colorful_path的上界
-int Graph::ub_colorful_path(vector<int>* Sub){
-    // int* f = new int [n];
-    // // 先分开考虑两个属性
-    // int* maxf = new int [2]; maxf[0] = maxf[1] = 0;
-    // for(int attr = 0; attr < 2; attr ++){
-    //     for(auto u : Sub[attr]){
-    //         f[u] = 1;
-    //         for(int i = offset[u]; i < pend[u]; i ++){
-    //             int v = edge_list[i];
-    //             if(color[v] >= color[u] || attribute[v] != attr || !RCvis[v]) continue;  // 只找color value更小的点
-    //             f[u] = max(f[u], f[v] + 1);
-    //         }
-    //         maxf[attr] = max(maxf[attr], f[u]);
-    //     }
-    // }
-    
-
-    // int ub = 2*min(maxf[0], maxf[1]) + delta;
-    // delete[] f;
-    // delete[] maxf;
-    
+int Graph::ub_colorful_path(vector<int> &R, vector<int>* C){
     // 将两个属性合在一起考虑
     int* f = new int [n];
     int maxu = 0;
-    vector<int> ss;
-    for(auto u : Sub[0]) ss.push_back(u);
-    for(auto u : Sub[1]) ss.push_back(u);
-    sort(ss.begin(), ss.end(), [&](int a, int b){return color[a] < color[b];});
-    for(int i = 0; i < ss.size(); i ++){
-        int u = ss[i];
-        f[u] = 1;
-        for(int j = offset[u]; j < pend[u]; j ++){
-            int v = edge_list[j];
-            if(color[v] >= color[u] || !RCvis[v]) continue;  // 只找color value更小的点
-            f[u] = max(f[u], f[v] + 1);
+    vector<int> ss[max_color];
+    for(auto u : R) ss[color[u]].push_back(u);
+    for(auto u : C[0]) ss[color[u]].push_back(u);
+    for(auto u : C[1]) ss[color[u]].push_back(u);
+    // sort(ss.begin(), ss.end(), [&](int a, int b){return color[a] < color[b];});
+
+    for(int i = 0; i < max_color; i ++){
+        for(auto u : ss[i]){
+            f[u] = 1;
+            for(int j = offset[u]; j < pend[u]; j ++){
+                int v = edge_list[j];
+                if(color[v] >= color[u] || !RCvis[v]) continue;  // 只找color value更小的点
+                f[u] = max(f[u], f[v] + 1);
+            }
+            maxu = max(maxu, f[u]);
         }
-        maxu = max(maxu, f[u]);
     }
     // if(maxu < ub) puts("all");
     // else if(maxu == ub) puts("equal");
     // else puts("repective");
     
     // return min(ub, maxu);
+    delete[] f;
+    return maxu;
+}
+// 11.求colorful_triangle上界
+int Graph::ub_colorful_triangle(vector<int> &R, vector<int>* C){
+    // 将两个属性合在一起考虑
+    int* f = new int [n];
+    int maxu = 0;
+    vector<int> ss[max_color];
+    for(auto u : R){
+        ss[color[u]].push_back(u);
+        f[u] = 1;
+    }
+    for(auto u : C[0]){
+        ss[color[u]].push_back(u);
+        f[u] = 1;
+    }
+    for(auto u : C[1]){
+        ss[color[u]].push_back(u);
+        f[u] = 1;
+    }
+    // 用于求交集
+    int sscnt = 0;
+    int* edge_set = new int [n];
+
+    for(int i = 2; i < max_color; i ++){
+        for(auto u : ss[i]){
+            sscnt = 0;
+            // 放入u的符合条件的邻居
+            for(int j = offset[u]; j < pend[u]; j ++){
+                int v = edge_list[j];
+                if(color[v] >= color[u] || !RCvis[v]) continue;  // 只找color value更小的点
+                edge_set[sscnt ++] = v;
+            }
+            for(int j = 0; j < sscnt; j ++){
+                int v = edge_set[j];
+                for(int k = 0; k < sscnt; k ++){
+                    int w = edge_set[k];
+                    if(color[w] >= color[v]) continue;
+                    f[u] = max(f[u], f[w] + 2);
+                }
+            }
+            
+            maxu = max(maxu, f[u]);
+        }
+    }
+    delete[] f;
+    delete[] edge_set;
+    // cout << maxu << endl; cout.flush();
     return maxu;
 }
