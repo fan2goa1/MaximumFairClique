@@ -34,9 +34,25 @@ The code structure can be listed as follows.
 
   In the present study, we employ three distinct algorithms: the Baseline Algorithm, the Upper-Bounding Solution, and the Heuristic Algorithm.
 
-  For the application of the **Baseline Algorithm**, the ensuing command is necessitated: ```./main path/to/Graph.txt path/to/attribute.txt threshold delta base```
+  For the application of the Baseline Algorithm, the ensuing command is necessitated: ```./main path/to/Graph.txt path/to/attribute.txt threshold delta base```
 
-  Conversely, to implement the **Upper-Bounding Solution**, the required command is as follows:```./main path/to/Graph.txt path/to/attribute.txt threshold delta ub```
+  Conversely, to implement the Upper-Bounding Solution, the required command is as follows:```./main path/to/Graph.txt path/to/attribute.txt threshold delta ub ub_type```. 
 
-  Lastly, the **Heuristic Algorithm** can be activated via the succeeding command: ```./main path/to/Graph.txt path/to/attribute.txt threshold delta heur```
+  Lastly, the Heuristic Algorithm can be activated via the succeeding command: ```./main path/to/Graph.txt path/to/attribute.txt threshold delta heur ub_type``` 
+
+  The specific corresponding relationship of ub_type is as follows.
+
+| ub_type | corresponding upper-bounding technique |
+| ------- | -------------------------------------- |
+| 1       | ub_size                                |
+| 2       | ub_color                               |
+| 3       | ub_attr                                |
+| 4       | ub_new                                 |
+| 5       | ub_attr_color                          |
+| 6       | ub_degeneracy                          |
+| 7       | ub_color_degeneracy                    |
+| 8       | ub_h_index                             |
+| 9       | ub_color_h_index                       |
+| 10      | ub_colorful_path                       |
+| 11      | ub_colorful_triangle                   |
 
