@@ -278,12 +278,24 @@ void Graph::Node_Contraction(){
         to_old_node[new_n] = tmp[i];
         new_n ++;
     }
-    for(int i = 0; i < m; i ++){
-        if(node_mapper[edge_list[i]] == -1) continue;
-        edge_list[i] = node_mapper[edge_list[i]];
+    // for(int i = 0; i < m; i ++){
+    //     // if(node_mapper[edge_list[i]] == -1) continue;
+    //     edge_list[i] = node_mapper[edge_list[i]];
+    // }
+
+    // 把一些应该被删除的边删掉
+    for(int i = 0; i < new_n; i ++){
+        int new_pend = offset[i];
+        for(int j = offset[i]; j < pend[i]; j ++){
+            if(node_mapper[edge_list[j]] != -1){
+                edge_list[new_pend ++] = node_mapper[edge_list[j]];
+            }
+        }
+        pend[i] = new_pend;
     }
+
     // 将node_cut清零
-    for(int i = 0; i < n; i ++) node_cut[i] = 0;
+    for(int i = 0; i < new_n; i ++) node_cut[i] = 0;
     
     n = new_n;
 
