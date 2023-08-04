@@ -188,7 +188,6 @@ void Graph::HeuBranch(vector<int>& R, vector<int>* C, int* r_attr, int tar_attr,
     }
     R.push_back(max_node);
     r_attr[tar_attr] ++;
-    tar_attr = 1 - tar_attr;
 
     // 更新候选集
     set<int> tmp_set, tmp_res;
@@ -225,8 +224,9 @@ void Graph::HeuBranch(vector<int>& R, vector<int>* C, int* r_attr, int tar_attr,
     if(R.size() + C[0].size() + C[1].size() < threshold * 2) return;  // 说明总点数不够
     if((r_attr[0] + ccnt0 < threshold) || (r_attr[1] + ccnt1 < threshold)) return;  // 说明有一个属性的点数不够k，找不到RFC了
 
-    HeuBranch(R, C, r_attr, tar_attr, a_min, type);  // 接着往下找
-    
+    HeuBranch(R, C, r_attr, 1-tar_attr, a_min, type);  // 接着往下找
+    r_attr[tar_attr] --;    // 回溯
+
     return;
 }
 // Alg9 Heuristic Framework
@@ -236,7 +236,9 @@ int Graph::Find_MRFC_Heuristic(){
     int* cnt = new int[2];
     cnt[0] = cnt[1] = 0;
     for(auto u : MRFC_heu) cnt[attribute[u]] ++;
-    int k_star = max(0, max(cnt[0], cnt[1]) - delta);
+    // int k_star = max(0, max(cnt[0], cnt[1]) - delta);
+    int k_star = MRFC_heu.size()-1;
+    int k_cast = 0;
     
     K_Core_Reduction(k_star);         // 计算K-Core
     Node_Contraction();
@@ -247,11 +249,13 @@ int Graph::Find_MRFC_Heuristic(){
     if(MRFC_heu.size() > now_MRFC.size()){  // 说明找到了更大的MRFC
         cnt[0] = cnt[1] = 0;
         for(auto u : MRFC_heu) cnt[attribute[u]] ++;
-        int k_cast = max(cnt[0], cnt[1]) - delta;
+        // k_cast = max(cnt[0], cnt[1]) - delta;
+        k_cast = MRFC_heu.size()-1;
+        printf("k_cast: %d\n", k_cast);
         K_Core_Reduction(k_cast);         // 计算K-Core
         Node_Contraction();
-        reColor();
     }
+    reColor();      // 重新着色
     int ub = max_color;
     have_ans = 1;
     delete[] cnt;
