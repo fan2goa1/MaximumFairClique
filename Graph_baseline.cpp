@@ -24,7 +24,7 @@ void Graph::MaxRFClique(){
     nvis = new int[n];
     for(int i = 0; i < n; i ++) nvis[i] = 0;
     for(int i = 0; i < n; i ++) vis[i] = 0; // 0表示还没被枚举
-    vector<int> R, X;
+    vector<int> R;
     vector<int> candidates[attr_size];
     vector<int> att_cnt;
     for(int i = 0; i < attr_size; i ++) att_cnt.push_back(0);
@@ -33,10 +33,11 @@ void Graph::MaxRFClique(){
     for(int i = 0; i < n; i ++){
         if(!vis[i]){
             component.clear();
+            att_cnt[0] = att_cnt[1] = 0;
             get_connected_component(i, vis);
-            R.clear(); X.clear();
+            R.clear(); candidates[0].clear(); candidates[1].clear();
             
-            component = GetColorfulOrdering();
+            component = GetColorfulOrdering();  // 可以更换
             
             for(int j = 0; j < component.size(); j ++){
                 candidates[attribute[component[j]]].push_back(component[j]);
@@ -44,13 +45,20 @@ void Graph::MaxRFClique(){
             }
             // for(auto u : candidates[0]) printf("%d ", u); puts("");
             // for(auto u : candidates[1]) printf("%d ", u); puts("");
+
+            // heur 加入ub6-11先进行剪枝
+            bool cut_flag = true;
+            if(ub_type > 5 && (this->alg_type == "heur" || this->alg_type == "ub")){     // ub tech
+                cut_flag = calc_ub(R, candidates, ub_type);
+            }
+            if(cut_flag == false) continue;
             Branch(R, candidates, candidate_siz, att_cnt, -1, 0);
         }
     }
 }
 
 void Graph::Branch(vector<int> &R, vector<int>* candidates, int candidate_siz, vector<int> att_cnt, int attr_max, int tar_attr){
-    if(attr_max == -1 && candidates[tar_attr].size() == 0){     // 说明该属性无法继续扩展，设置attr_max
+    if(attr_max == -1 && candidates[tar_attr].empty()){     // 说明该属性无法继续扩展，设置attr_max
         attr_max = delta + att_cnt[tar_attr];
         Branch(R, candidates, candidate_siz, att_cnt, attr_max, 1-tar_attr);
         return ;
@@ -68,15 +76,23 @@ void Graph::Branch(vector<int> &R, vector<int>* candidates, int candidate_siz, v
 		// 		}
 		// 	}
 		// }
+        
+        // if(R.size() == 27) {
+        //     MRFC_real = R;
+        //     sort(MRFC_real.begin(), MRFC_real.end());
+        //     printf("29");
+        //     for(auto u : MRFC_real) printf(" %d", to_old_node[u]); puts("");
+        // }
 		if(toPrint && R.size() > MRFC_real.size() || !have_ans){        // update
-            cout << "Found one! Size:" << R.size() << "; Now max size: " << MRFC_real.size() << endl;
+            // cout << "Found one! Size:" << R.size() << "; Now max size: " << MRFC_real.size() << endl;
             // int cnta = 0, cntb = 0;
             // for(auto u : R){
             //     if(attribute[u] == 0) cnta ++;
             //     else cntb ++;
             // }
             // cout << cnta << " " << cntb << endl;
-            for(auto u : R) cout << u << " "; cout << endl;
+            // for(auto u : R) cout << u << " "; cout << endl;
+            // for(auto u : R) cout << attribute[u] << " "; cout << endl;
             cout.flush();
             MRFC_real = R;
             have_ans = 1;
@@ -120,8 +136,8 @@ void Graph::Branch(vector<int> &R, vector<int>* candidates, int candidate_siz, v
                 for(int k = 0; k < candidates[j].size(); k++){
                     if(nvis[candidates[j][k]]){
                         newC[j].push_back(candidates[j][k]);
-                        newCnt[j]++;
-                        candidate_siz++;
+                        newCnt[j] ++;
+                        candidate_siz ++;
                     }
                 }
             }
@@ -129,7 +145,13 @@ void Graph::Branch(vector<int> &R, vector<int>* candidates, int candidate_siz, v
 
         bool cut_flag = true;
         if(this->alg_type == "ub" || this->alg_type == "heur"){     // ub tech
-            cut_flag = calc_ub(R, newC);
+            // if(!have_ans || R.size() >= int(double(MRFC_real.size()) * 0.9)){
+            //     cut_flag = calc_ub(R, newC, ub_type);
+            // }
+            // else {
+            //     cut_flag = calc_ub(R, newC, 0);
+            // }
+            cut_flag = calc_ub(R, newC, 0);
         }
         else if(this->alg_type == "base"){  // baseline, only examine the size
             cut_flag = calc_base(R, newC);
@@ -156,9 +178,13 @@ void Graph::Branch(vector<int> &R, vector<int>* candidates, int candidate_siz, v
 		/****/
 		// Branch(newR, newC, candidate_siz, newX, att_cnt, attr_max, tar_attr ^ 1);
         att_cnt[tar_attr] ++;
-        Branch(R, newC, candidate_siz, att_cnt, attr_max, 1-tar_attr);
-		// X.push_back(cur);
-		// newR.pop_back();
+        if(attr_max != -1 && newC[1-tar_attr].empty()) {
+            Branch(R, newC, candidate_siz, att_cnt, attr_max, tar_attr);
+        }
+        else {
+            Branch(R, newC, candidate_siz, att_cnt, attr_max, 1-tar_attr);
+        }
+        att_cnt[tar_attr] --;
         R.pop_back();
 	}
 	if(newCnt != nullptr) delete[] newCnt;
