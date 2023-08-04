@@ -91,7 +91,7 @@ void Graph::ReadGraph(const char* inputname, const char* attr, int th, int _delt
     for(int i = 0; i < pairs.size(); i++){
         if(pairs[i].first > n) n = pairs[i].first;
         if(pairs[i].second > n) n = pairs[i].second;
-        if(i > 0 && pairs[i].first == pairs[i - 1].first && pairs[i].second == pairs[i - 1].second) printf("Exist self loop!\n");
+        if(i > 0 && pairs[i].first == pairs[i - 1].first && pairs[i].second == pairs[i - 1].second) printf("Exist same edge twice!\n");
     }
     n ++;           //range from [0, n-1];
     m = pairs.size();   // range from [0, m-1]
@@ -283,16 +283,21 @@ void Graph::Node_Contraction(){
     //     edge_list[i] = node_mapper[edge_list[i]];
     // }
 
+    int lst = 0;
     // 把一些应该被删除的边删掉
     for(int i = 0; i < new_n; i ++){
-        int new_pend = offset[i];
+        int new_pend = lst;
+        // int new_pend = offset[i];
         for(int j = offset[i]; j < pend[i]; j ++){
             if(node_mapper[edge_list[j]] != -1){
                 edge_list[new_pend ++] = node_mapper[edge_list[j]];
             }
         }
+        offset[i] = lst;
         pend[i] = new_pend;
+        lst = pend[i];
     }
+    m = lst;
 
     // 将node_cut清零
     for(int i = 0; i < new_n; i ++) node_cut[i] = 0;
@@ -439,9 +444,14 @@ vector<int> Graph::GetColorfulOrdering(){
 
 void Graph::printMRFC_real(){
     printf("The size of real MRFC: %d\n", MRFC_real.size());
+    sort(MRFC_real.begin(), MRFC_real.end());
     for(auto u : MRFC_real){
-        printf("%d ", to_old_node[u]);
+        printf("%d\n", to_old_node[u]);
+    } puts(""); puts("");
+    for(auto u : MRFC_real){
+        printf("%d\n", attribute[u]);
     } puts("");
+
     return ;
 }
 // 双指针法求
