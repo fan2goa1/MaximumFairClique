@@ -16,91 +16,104 @@ bool Graph::calc_base(vector<int> &R, vector<int>* C){
 }
 
 // 用于ub, 计算多个upper bound，如果被剪枝了，就返回false，否则返回true
-bool Graph::calc_ub(vector<int> &R, vector<int>* C){
+bool Graph::calc_ub(vector<int> &R, vector<int>* C, int type){
     int temp = MRFC_real.size();
-    int min_ub = max(temp, threshold*attr_size - 1);
-    // if(ub_size(R, C) <= min_ub) return false;
-    // if(ub_color(R, C) <= min_ub) return false;
-    // if(ub_attr(R, C) <= min_ub) return false;
+    int min_ub = max(temp, threshold*2 - 1);
+    if(ub_size(R, C) <= min_ub) return false;
+    if(ub_color(R, C) <= min_ub) return false;
+    if(ub_attr(R, C) <= min_ub) return false;
     if(ub_new(R, C) <= min_ub) return false;
     // cout << ub_size(R,C) << " " << ub_color(R,C) << " " << ub_attr(R,C) << endl;
 
-    // vector<int>* Sub = new vector<int> [2];         // 分别为R C中属性为0/1的子图的点
-    // if(ub_attr_color(R, C, Sub) <= min_ub){
-    //     delete [] Sub;
-    //     return false;
-    // }
-    
-    // 构建属性子图需要用到的东西
-    // int* deg_arr = new int [n];         // Ga/Gb中的点的度数
-    // int* color_deg_arr = new int [n];   // Ga/Gb中的点的colorful degree
-    // for(auto u : R) RCvis[u] = 1;       // 标记是否为R C中的点
-    // for(auto u : C[0]) RCvis[u] = 1;
-    // for(auto u : C[1]) RCvis[u] = 1;
-    // if(ub_degeneracy(R, C, deg_arr, 1) <= min_ub){      // ub6
-    //     for(auto u : R) RCvis[u] = 0;       // recover
-    //     for(auto u : C[0]) RCvis[u] = 0;
-    //     for(auto u : C[1]) RCvis[u] = 0;
-    //     delete[] Sub;
-    //     delete[] deg_arr;
-    //     delete[] color_deg_arr;
-    //     return false;
-    // }
-    // if(ub_color_degeneracy(R, C, color_deg_arr, 1) <= min_ub){ // ub7
-    //     for(auto u : R) RCvis[u] = 0;       // recover
-    //     for(auto u : C[0]) RCvis[u] = 0;
-    //     for(auto u : C[1]) RCvis[u] = 0;
-    //     delete[] Sub;
-    //     delete[] deg_arr;
-    //     delete[] color_deg_arr;
-    //     return false;
-    // }
-    // int nonsense = ub_degeneracy(R, C, deg_arr, 0); // ub8
-    // if(ub_h_index(Sub, deg_arr) <= min_ub){      // ub8
-    //     for(auto u : R) RCvis[u] = 0;       // recover
-    //     for(auto u : C[0]) RCvis[u] = 0;
-    //     for(auto u : C[1]) RCvis[u] = 0;
-    //     delete[] Sub;
-    //     delete[] deg_arr;
-    //     delete[] color_deg_arr;
-    //     return false;
-    // }
-    // int nonsense1 = ub_color_degeneracy(R, C, color_deg_arr, 0); // ub9
-    // if(ub_color_h_index(Sub, color_deg_arr) <= min_ub){  // ub9
-    //     for(auto u : R) RCvis[u] = 0;       // recover
-    //     for(auto u : C[0]) RCvis[u] = 0;
-    //     for(auto u : C[1]) RCvis[u] = 0;
-    //     delete[] Sub;
-    //     delete[] deg_arr;
-    //     delete[] color_deg_arr;
-    //     return false;
-    // }
-    // if(ub_colorful_path(R, C) <= min_ub){        // ub10
-    //     for(auto u : R) RCvis[u] = 0;       
-    //     for(auto u : C[0]) RCvis[u] = 0;
-    //     for(auto u : C[1]) RCvis[u] = 0;
-    //     // delete[] Sub;
-    //     // delete[] deg_arr;
-    //     // delete[] color_deg_arr;
-    //     return false;
-    // }
-    // if(ub_colorful_triangle(R, C) <= min_ub){       // ub11
-    //     for(auto u : R) RCvis[u] = 0;       
-    //     for(auto u : C[0]) RCvis[u] = 0;
-    //     for(auto u : C[1]) RCvis[u] = 0;
-        // delete[] Sub;
-        // delete[] deg_arr;
-        // delete[] color_deg_arr;
-    //     return false;
-    // }
-    /* recover */
-    // for(auto u : R) RCvis[u] = 0;       
-    // for(auto u : C[0]) RCvis[u] = 0;
-    // for(auto u : C[1]) RCvis[u] = 0;
+    vector<int>* Sub = new vector<int> [2];         // 分别为R C中属性为0/1的子图的点
+    if(ub_attr_color(R, C, Sub) <= min_ub){
+        delete [] Sub;
+        return false;
+    }
 
-    // delete[] Sub;
-    // delete[] deg_arr;
-    // delete[] color_deg_arr;
+    // 只有第一次才做下面复杂ub，剩下只做ub1-5
+    if(type >= 0 && type <= 5) return true;
+
+    // 构建属性子图需要用到的东西
+    int* deg_arr = new int [n];         // Ga/Gb中的点的度数
+    int* color_deg_arr = new int [n];   // Ga/Gb中的点的colorful degree
+    for(auto u : R) RCvis[u] = 1;       // 标记是否为R C中的点
+    for(auto u : C[0]) RCvis[u] = 1;
+    for(auto u : C[1]) RCvis[u] = 1;
+    if(type == 6 && ub_degeneracy(R, C, deg_arr, 1) <= min_ub){      // ub6
+        for(auto u : R) RCvis[u] = 0;       // recover
+        for(auto u : C[0]) RCvis[u] = 0;
+        for(auto u : C[1]) RCvis[u] = 0;
+        delete[] Sub;
+        delete[] deg_arr;
+        delete[] color_deg_arr;
+        return false;
+    }
+
+    if(type == 7 && ub_color_degeneracy(R, C, color_deg_arr, 1) <= min_ub){ // ub7
+        for(auto u : R) RCvis[u] = 0;       // recover
+        for(auto u : C[0]) RCvis[u] = 0;
+        for(auto u : C[1]) RCvis[u] = 0;
+        delete[] Sub;
+        delete[] deg_arr;
+        delete[] color_deg_arr;
+        return false;
+    }
+
+    if(type == 8){
+        // int nonsense = ub_degeneracy(R, C, deg_arr, 0); // ub8
+        if(ub_h_index(Sub, deg_arr) <= min_ub){      // ub8
+            for(auto u : R) RCvis[u] = 0;       // recover
+            for(auto u : C[0]) RCvis[u] = 0;
+            for(auto u : C[1]) RCvis[u] = 0;
+            delete[] Sub;
+            delete[] deg_arr;
+            delete[] color_deg_arr;
+            return false;
+        }
+    }
+
+    if(type == 9){
+        int nonsense1 = ub_color_degeneracy(R, C, color_deg_arr, 0); // ub9
+        if(ub_color_h_index(Sub, color_deg_arr) <= min_ub){  // ub9
+            for(auto u : R) RCvis[u] = 0;       // recover
+            for(auto u : C[0]) RCvis[u] = 0;
+            for(auto u : C[1]) RCvis[u] = 0;
+            delete[] Sub;
+            delete[] deg_arr;
+            delete[] color_deg_arr;
+            return false;
+        }
+    }
+
+    if(type == 10 && ub_colorful_path(R, C) <= min_ub){        // ub10
+        for(auto u : R) RCvis[u] = 0;       
+        for(auto u : C[0]) RCvis[u] = 0;
+        for(auto u : C[1]) RCvis[u] = 0;
+        delete[] Sub;
+        delete[] deg_arr;
+        delete[] color_deg_arr;
+        return false;
+    }
+    
+    if(type == 11 && ub_colorful_triangle(R, C) <= min_ub){       // ub11
+        for(auto u : R) RCvis[u] = 0;       
+        for(auto u : C[0]) RCvis[u] = 0;
+        for(auto u : C[1]) RCvis[u] = 0;
+        delete[] Sub;
+        delete[] deg_arr;
+        delete[] color_deg_arr;
+        return false;
+    }
+    /* recover */
+    for(auto u : R) RCvis[u] = 0;       
+    for(auto u : C[0]) RCvis[u] = 0;
+    for(auto u : C[1]) RCvis[u] = 0;
+
+    delete[] Sub;
+    delete[] deg_arr;
+    delete[] color_deg_arr;
+
     return true;
 }
 
@@ -217,7 +230,7 @@ int Graph::ub_degeneracy(vector<int> &R, vector<int>* C, int* degree_arr, int fl
     int* vis = new int [n];              // vis[i]=1表示点i还没有被删除
     for(int attr = 0; attr < 2; attr ++){
         totn = 0;
-        for(auto u : R){
+        for(auto u : R){           // 先求attributedegree
             if(attribute[u] == attr){   // u在R C中且属性一致
                 degree_arr[u] = 0;
                 ordered_c[totn ++] = u;
@@ -360,26 +373,51 @@ int Graph::ub_color_degeneracy(vector<int> &R, vector<int>* C, int* degree_arr, 
 }
 // 8.求H-index based upper bound
 int Graph::ub_h_index(vector<int>* Sub, int* degree_arr){
-    int h[2]; h[0] = h[1] = 0;
+    // int h[2]; h[0] = h[1] = 0;
+    // int* buc_cnt = new int [n];     // buc_cnt[i]表示degree=i的点的个数
+    // // cout << Sub[0].size() << " " << Sub[1].size() << endl;
+    // for(int attr = 0; attr < 2; attr ++){
+    //     for(int i = 0; i < Sub[attr].size(); i ++) buc_cnt[i] = 0;  // 初始化
+    //     for(auto u : Sub[attr]) buc_cnt[degree_arr[u]] ++;
+    //     // for(int i = 0; i < Sub[attr].size(); i ++) printf("%d ", buc_cnt[i]); puts("");
+    //     for(int i = Sub[attr].size()-1; i >= 0; i --){
+    //         if(buc_cnt[i] >= i+1){        // 说明至少有i个点的degree>=i
+    //             h[attr] = i+1;
+    //             break;
+    //         }
+    //         if(i > 0) buc_cnt[i-1] += buc_cnt[i]; // 否则，将degree=i的点的个数加到degree=i-1的点的个数上
+    //         else h[attr] = 1;
+    //     }
+    // }
+
+    // delete[] buc_cnt;
+
+    // int ub = 2*min(h[0], h[1]) + delta;
+    // // cout << ub << " " << Sub[0].size() << " " << Sub[1].size()<< endl;
+    // return ub;
+
+    int h = 0;
+    int tot_sz = Sub[0].size() + Sub[1].size();
     int* buc_cnt = new int [n];     // buc_cnt[i]表示degree=i的点的个数
     // cout << Sub[0].size() << " " << Sub[1].size() << endl;
     for(int attr = 0; attr < 2; attr ++){
         for(int i = 0; i < Sub[attr].size(); i ++) buc_cnt[i] = 0;  // 初始化
-        for(auto u : Sub[attr]) buc_cnt[degree_arr[u]] ++;
+        for(auto u : Sub[attr]) buc_cnt[min(pend[u]-offset[u], tot_sz)] ++;
         // for(int i = 0; i < Sub[attr].size(); i ++) printf("%d ", buc_cnt[i]); puts("");
-        for(int i = Sub[attr].size()-1; i >= 0; i --){
-            if(buc_cnt[i] >= i+1){        // 说明至少有i个点的degree>=i
-                h[attr] = i+1;
-                break;
-            }
-            if(i > 0) buc_cnt[i-1] += buc_cnt[i]; // 否则，将degree=i的点的个数加到degree=i-1的点的个数上
-            else h[attr] = 1;
+    }
+
+    for(int i = tot_sz; i >= 0; i --){
+        if(buc_cnt[i] >= i+1){        // 说明至少有i个点的degree>=i
+            h = i+1;
+            break;
         }
+        if(i > 0) buc_cnt[i-1] += buc_cnt[i]; // 否则，将degree=i的点的个数加到degree=i-1的点的个数上
+        else h = 1;
     }
 
     delete[] buc_cnt;
 
-    int ub = 2*min(h[0], h[1]) + delta;
+    int ub = h;
     // cout << ub << " " << Sub[0].size() << " " << Sub[1].size()<< endl;
     return ub;
 }
@@ -403,6 +441,7 @@ int Graph::ub_color_h_index(vector<int>* Sub, int* degree_arr){
     if(buc_cnt != nullptr) delete[] buc_cnt;
 
     int ub = 2*min(h[0], h[1]) + delta;
+
     return ub;
 }
 // 10.求colorful_path的上界
