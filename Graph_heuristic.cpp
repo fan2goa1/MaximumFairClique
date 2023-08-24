@@ -69,7 +69,7 @@ void Graph::Degree_Heuristic(){
     }
     sort(sn, sn + n, sort_by_degree);     // 按点从大到小排序
 
-    for(int i = 0; i < 10; i ++){         // 分别枚举10个度数最大的点进行Branch
+    for(int i = 0; i < 1; i ++){         // 分别枚举10个度数最大的点进行Branch
         int max_node = sn[i].node;
         for(int j = 0; j < n; j ++) vis[j] = 0;
         component.clear();
@@ -116,7 +116,7 @@ void Graph::Colorful_Degree_Heuristic(){
     }
     sort(sn, sn + n, sort_by_degree);     // 按点从大到小排序
 
-    for(int i = 0; i < 10; i ++){         // 分别枚举10个度数最大的点进行Branch
+    for(int i = 0; i < 1; i ++){         // 分别枚举10个度数最大的点进行Branch
         int max_node = sn[i].node;
         for(int j = 0; j < n; j ++) vis[j] = 0;
         component.clear();
@@ -142,20 +142,25 @@ void Graph::Colorful_Degree_Heuristic(){
 }
 
 void Graph::HeuBranch(vector<int>& R, vector<int>* C, int* r_attr, int tar_attr, int a_min, string type){
+    // cout << R.size() << endl; for (auto u: R) cout << u << ": "; cout << endl; cout.flush();
+    if(R.size() > MRFC_heu.size()){
+        MRFC_heu = R;
+    }
+
     if(R.size() + C[0].size() + C[1].size() <= MRFC_heu.size()) return;  // 说明当前搜索到的结果已经不可能比当前最优解更优了
     if(C[0].size() + C[1].size() == 0){         // 此时候选集为空，搜索到底
         if(R.size() > MRFC_heu.size()){
             MRFC_heu = R;
-            cout << "Find a new MRFC with size " << MRFC_heu.size() << endl;
-            for(auto u : MRFC_heu) cout << to_old_node[u] << " "; puts("");
+            // cout << "Find a new MRFC with size " << MRFC_heu.size() << endl;
+            // for(auto u : MRFC_heu) cout << to_old_node[u] << " "; puts("");
         }
         return;
     }
     if(a_min != -1 && r_attr[tar_attr] == a_min + delta){       // 说明加到上限不能再加了
         if(R.size() > MRFC_heu.size()){
             MRFC_heu = R;
-            cout << "Find a new MRFC with size " << MRFC_heu.size() << endl;
-            for(auto u : MRFC_heu) cout << to_old_node[u] << " "; puts("");
+            // cout << "Find a new MRFC with size " << MRFC_heu.size() << endl;
+            // for(auto u : MRFC_heu) cout << to_old_node[u] << " "; puts("");
         }
         return ;
     }
@@ -231,6 +236,7 @@ void Graph::HeuBranch(vector<int>& R, vector<int>* C, int* r_attr, int tar_attr,
 }
 // Alg9 Heuristic Framework
 int Graph::Find_MRFC_Heuristic(){
+    MRFC_heu.clear();
     Degree_Heuristic();             // 找到用度数排序得到的当前MRFC
 
     int* cnt = new int[2];
@@ -240,9 +246,9 @@ int Graph::Find_MRFC_Heuristic(){
     int k_star = MRFC_heu.size()-1;
     int k_cast = 0;
     
-    K_Core_Reduction(k_star);         // 计算K-Core
+    // K_Core_Reduction(k_star);         // 计算K-Core
     Node_Contraction();
-    printf("k_star: %d\n", k_star);
+    // printf("k_star: %d\n", k_star);
 
     vector<int> now_MRFC = MRFC_heu;
     Colorful_Degree_Heuristic();    // 再用Colorful degree排序试找更大的MRFC
@@ -251,7 +257,7 @@ int Graph::Find_MRFC_Heuristic(){
         for(auto u : MRFC_heu) cnt[attribute[u]] ++;
         // k_cast = max(cnt[0], cnt[1]) - delta;
         k_cast = MRFC_heu.size()-1;
-        printf("k_cast: %d\n", k_cast);
+        // printf("k_cast: %d\n", k_cast);
         K_Core_Reduction(k_cast);         // 计算K-Core
         Node_Contraction();
     }
@@ -259,6 +265,9 @@ int Graph::Find_MRFC_Heuristic(){
     int ub = max_color;
     have_ans = 1;
     delete[] cnt;
+
+    cout << "Heur size: " << MRFC_heu.size() << endl;
+    cout.flush();
 
     return ub;
 }
