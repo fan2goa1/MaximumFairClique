@@ -58,6 +58,8 @@ The code structure can be listed as follows.
 
 ## About Dataset
 
+You can find and download these datasets in [this repo](https://github.com/fan2goa1/Attributed_Graph_Data).
+
 **dblp_aminer:**
 
 dblp_aminer is a real dataset. It includes tens of thousands scholars and pictures their social network.
