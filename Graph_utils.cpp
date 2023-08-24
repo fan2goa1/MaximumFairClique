@@ -446,11 +446,12 @@ void Graph::printMRFC_real(){
     printf("The size of real MRFC: %d\n", MRFC_real.size());
     sort(MRFC_real.begin(), MRFC_real.end());
     for(auto u : MRFC_real){
-        printf("%d\n", to_old_node[u]);
-    } puts(""); puts("");
-    for(auto u : MRFC_real){
-        printf("%d\n", attribute[u]);
+        printf("[node_id] %d;\t[attr] %d\n", to_old_node[u], attribute[u]);
     } puts("");
+
+    // for(auto u : MRFC_real){
+    //     printf("%d\n", attribute[u]);
+    // } puts("");
 
     return ;
 }
