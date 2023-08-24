@@ -19,6 +19,7 @@ void Graph::update_map(){
 
 void Graph::MaxRFClique(){
     update_map();
+    MRFC_real.clear();
     for(auto u : MRFC_heu) MRFC_real.push_back(u);      // 用于存储真正的MRFC
     int* vis = new int[n];
     nvis = new int[n];
@@ -64,6 +65,8 @@ void Graph::Branch(vector<int> &R, vector<int>* candidates, int candidate_siz, v
         return ;
 	}
     // cout << "Now R size: " << R.size() << endl;
+    // for(auto u: R) cout << u << " "; cout << endl;
+    // cout.flush();
 	if(candidate_siz == 0 || (attr_max != -1 && att_cnt[tar_attr] >= attr_max)){ // 候选集为空或者封顶了
 		int toPrint = true;
 		// if(X.size() != 0){
@@ -85,6 +88,7 @@ void Graph::Branch(vector<int> &R, vector<int>* candidates, int candidate_siz, v
         // }
 		if(toPrint && R.size() > MRFC_real.size() || !have_ans){        // update
             // cout << "Found one! Size:" << R.size() << "; Now max size: " << MRFC_real.size() << endl;
+            // cout.flush();
             // int cnta = 0, cntb = 0;
             // for(auto u : R){
             //     if(attribute[u] == 0) cnta ++;
@@ -93,7 +97,6 @@ void Graph::Branch(vector<int> &R, vector<int>* candidates, int candidate_siz, v
             // cout << cnta << " " << cntb << endl;
             // for(auto u : R) cout << u << " "; cout << endl;
             // for(auto u : R) cout << attribute[u] << " "; cout << endl;
-            cout.flush();
             MRFC_real = R;
             have_ans = 1;
 		}
