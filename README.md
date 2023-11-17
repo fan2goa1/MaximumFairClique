@@ -42,50 +42,31 @@ The code structure can be listed as follows.
 
   The specific corresponding relationship of ub_type is as follows.
 
-| ub_type | corresponding upper-bounding technique |
-| ------- | -------------------------------------- |
-| 1       | ub_size                                |
-| 2       | ub_color                               |
-| 3       | ub_attr                                |
-| 4       | ub_new                                 |
-| 5       | ub_attr_color                          |
-| 6       | ub_degeneracy                          |
-| 7       | ub_color_degeneracy                    |
-| 8       | ub_h_index                             |
-| 9       | ub_color_h_index                       |
-| 10      | ub_colorful_path                       |
-| 11      | ub_colorful_triangle                   |
+| ub_type | corresponding upper-bounding technique | Notation in Paper ｜
+| ------- | -------------------------------------- | ----------------- |
+| 1       | ub_size                                | $ub_s$            |
+| 2       | ub_color                               | $ub_c$            |
+| 3       | ub_attr                                | $ub_a$            |
+| 4       | ub_new                                 | $ub_{eac}$        |
+| 5       | ub_attr_color                          | $ub_{ac}$         |
+| 6       | ub_degeneracy                          | $ub_{\Delta}$  |
+| 7       | ub_color_degeneracy                    | $ub_{cd}$         |
+| 8       | ub_h_index                             | $ub_{h}$          |
+| 9       | ub_color_h_index                       | $ub_{ch}$         |
+| 10      | ub_colorful_path                       | $ub_{cp}$         |
 
 ## About Dataset
 
-You can find and download these datasets in [this repo](https://github.com/fan2goa1/Attributed_Graph_Data).
+We employ six real-world graphs to evaluate the efficiency of the proposed algorithms. The statistics of these datasets are summarized in table below.
 
-**dblp_aminer:**
+| **Dataset** | $n = \|V\|$ | $m=\|E\|$    | $d_{max}$ | Description       |
+| ----------- | --------- | ---------- | --------- | --------------------- |
+| Themarker   | 69,414    | 3,289,686  | 8,930     | Social network        |
+| Google      | 875,713   | 8,644,102  | 6,332     | Web network           |
+| DBLP        | 1,843,615 | 16,700,518 | 2,213     | Collaboration network |
+| Flixster    | 2,523,387 | 15,837,602 | 1,474     | Social network        |
+| Pokec       | 1,632,803 | 44,603,928 | 14,854    | Social network        |
+| Aminer      | 423,469   | 2,462,224  | 712       | Collaboration network |
 
-dblp_aminer is a real dataset. It includes tens of thousands scholars and pictures their social network.
-
-The binary attribute is about gender, while 0 represents female and 1 represents male.
-
-**dblp_DB/AI:**
-
-This is a dataset extracted from dblp data. 
-
-This undirected graph represents the cooperative relationship between scholars. If two scholars have published the same paper, there is an edge between the two corresponding points, otherwise there is no.
-
-The binary attribute is about the number of published papers, while if a scholar has published more papers in the area of database than that of AI, the corresponding attribute is 1, otherwise is 0.
-
-**dblp_DB/DM:**
-
-The graph is totally the same with dblp_DB/DM. The only difference is attribute. If a scholar has published more papers in the area of database than that of DM, the corresponding attribute is 1, otherwise is 0.
-
-**dblp_year:**
-
-The graph is totally the same with dblp_DB/DM. The only difference is attribute. If a scholar published his first paper before 2008, the corresponding attribute is 1, meaning he/she is a senior scholar, otherwise is 0.
-
-**NBA:**
-
-This is a real dataset. This undirected graph represents the cooperative relationship between NBA players. The binary attribute is about nationalities. If a player is from America, the corresponding attribute is 0, otherwise is 1.
-
-**IMDB:**
-
-This is a real dataset.
+Among them, Google is a web graph, Aminer and DBLP are collaboration networks, and the remaining datasets are social networks. Aminer is an attributed graph where the attribute indicates the gender of scholars and can be downloaded from [FairLaR](https://github.com/SotirisTsioutsiouliklis/FairLaR/). The other datasets are non-attributed graphs and can be obtained from [networkrepository](networkrepository.com/) and [SNAP](snap.stanford.edu). For these non-attributed graphs,
+we construct attribute graphs by randomly assigning attributes to vertices with approximately equal probability to evaluate the efficiency of all algorithms. Some of the attributed graphs can be found in [this repo](https://github.com/fan2goa1/Attributed_Graph_Data).
