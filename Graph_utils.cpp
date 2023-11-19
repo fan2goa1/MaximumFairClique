@@ -28,26 +28,11 @@ Graph::~Graph(){
 
 void Graph::printGraph(){
     printf("<node num: %d   edge num: %d>\n", n, m);
-    // printf("Left nodes: ");
-    // for(int i = 0; i < n; i ++){
-    //     if(!node_cut[i]) printf("%d ", i);
-    // } puts("");
-    // printf("Edge list: ");
-    // for(int i = 0; i < n; i ++){
-    //     if(node_cut[i]) continue;
-    //     for(int j = offset[i]; j < pend[i]; j ++){
-    //         printf("<%d, %d>, ", i, edge_list[j]);
-    //     }
-    // } printf("Total: %d\n", m);
-
-    // for(int i = 0; i < n; i ++){
-    //     printf("new: %d; old: %d\n", i, to_old_node[i]);
-    // }
     printf("The number of colors: %d\n", max_color);
 
     return ;
 }
-// 用于检查当前图中对于无向边(u, v)是不是都出现了<u, v>和<v, u>
+
 void Graph::check(){
     unordered_edge.clear();
     for(int i = 0; i < n; i ++){
@@ -70,8 +55,6 @@ void Graph::check(){
     return ;
 }
 
-
-// 输入图，无向图，边已经按第一个点的顺序从小到大排好， 同时必须保证第一点相同的情况下第二个点从小到大排好序
 void Graph::ReadGraph(const char* inputname, const char* attr, int th, int _delta){
     threshold = th;
     delta = _delta;
@@ -97,7 +80,6 @@ void Graph::ReadGraph(const char* inputname, const char* attr, int th, int _delt
     m = pairs.size();   // range from [0, m-1]
     printf("< Number of nodes= %d, number of edges= %d >\n", n, m);
 
-    // 保存边
     edge_list = new int [m + 1];
     offset = new int [n + 1];
     pend = new int [n + 1];
@@ -108,17 +90,16 @@ void Graph::ReadGraph(const char* inputname, const char* attr, int th, int _delt
         while(indx < pairs.size() && pairs[indx].first == i){
             edge_list[offset[i + 1] ++] = pairs[indx ++].second;
         }
-        pend[i] = offset[i + 1];    // 点u的边在数组中的范围[offset[u], pend[u])
+        pend[i] = offset[i + 1];    
     }
     fclose(f);
     node_cut = new int [n];
     for(int i = 0; i < n; i ++) node_cut[i] = 0;
     to_old_node = new int [n];
-    for(int i = 0; i < n; i ++) to_old_node[i] = i;     // 最开始每个点的id都表示原图中的自己
+    for(int i = 0; i < n; i ++) to_old_node[i] = i;     
     RCvis = new int [n];
     for(int i = 0; i < n; i ++) RCvis[i] = 0;
 
-    // 读入点的属性
     attribute = new int[n];
     f = fopen(attr, "r");
     if(f == nullptr){
@@ -129,8 +110,6 @@ void Graph::ReadGraph(const char* inputname, const char* attr, int th, int _delt
     attr_size = 0;
     while(fscanf(f, "%d%d", &node, &a) == 2){
         if(node >= n){
-        //    printf("attribute error! node=%d\n",node);
-        //    exit(1);
             continue;
         }
         if(a >= 2){printf("Exist more than 2 attributes!"); exit(0);}
@@ -142,15 +121,13 @@ void Graph::ReadGraph(const char* inputname, const char* attr, int th, int _delt
     printf("read done\n");
 }
 
-// 图预处理. 进行简单的（关于度的）剪枝和贪心法图染色
 void Graph::Preprocess(){  
     int* cvis = new int[n];
     color = new int[n];
     int* head = new int[n];
     int* nxt = new int[n];
-    int max_degree = 0;             // 所有点的最大度数
+    int max_degree = 0;            
     int* degree = new int[n];
-    // 将度数不满足k*2-1的点直接删除
     for(int i = 0; i < n; i ++){
         degree[i] = offset[i + 1] - offset[i];
         head[i] = n;
@@ -168,34 +145,32 @@ void Graph::Preprocess(){
         if(degree[i] > max_degree) max_degree = degree[i];
     }
     if(degree != nullptr) delete[] degree;
-    // 进行贪心法的图染色
-    for(int i = 0; i < n; i ++) cvis[i] = 0;    // 表示颜色i还没被用过
-    for(int i = 0; i < n; i ++) color[i] = n;   // n表示还没有被染色
-	// 依次从最大度数开始决定每个点的颜色
+
+    for(int i = 0; i < n; i ++) cvis[i] = 0;  
+    for(int i = 0; i < n; i ++) color[i] = n;
 	max_color = 0;
 	for(int ii = max_degree; ii >= 1; ii --){
 		for(int jj = head[ii]; jj != n; jj = nxt[jj]){
 			int u = jj;
 			for(int j = offset[u]; j < offset[u+1]; j ++) {
                 int c = color[edge_list[j]];
-                if(c != n) {        // 如果点u的邻居已经被染色了，这个颜色不能用
+                if(c != n) {        
                     cvis[c] = 1;
                 }
 			}
-			for(int j = 0; ; j ++){     // 找一个没被用过的颜色
+			for(int j = 0; ; j ++){     
                 if(!cvis[j]){
-                    color[u] = j;       // 将点u染成颜色j
+                    color[u] = j;      
                     if(j > max_color) max_color = j;
                     break;
 			    }
             }
 			for(int j = offset[u]; j < offset[u + 1]; j ++){
                 int c = color[edge_list[j]];
-                if(c != n) cvis[c] = 0;     // 复原
+                if(c != n) cvis[c] = 0;     
 			}
 		}
 	}
-    // for(int i = 0; i < n; i ++) printf("%d ", color[i]); puts("");
     max_color ++;
     if(cvis != nullptr) delete[] cvis;
     if(head != nullptr) delete[] head;
@@ -206,11 +181,11 @@ void Graph::Preprocess(){
 }
 
 void Graph::reColor(){
-    Node_Contraction();             // 先缩图保证新图中每个点都没被删
+    Node_Contraction();             
     int* cvis = new int[n];
     int* head = new int[n];
     int* nxt = new int[n];
-    int max_degree = 0;             // 所有点的最大度数
+    int max_degree = 0;             
     int* degree = new int[n];
 
     for(int i = 0; i < n; i ++){
@@ -224,34 +199,32 @@ void Graph::reColor(){
     }
     if(degree != nullptr) delete[] degree;
 
-    // 进行贪心法的图染色
-    for(int i = 0; i < n; i ++) cvis[i] = 0;    // 表示颜色i还没被用过
-    for(int i = 0; i < n; i ++) color[i] = n;   // n表示还没有被染色
-	// 依次从最大度数开始决定每个点的颜色
+    for(int i = 0; i < n; i ++) cvis[i] = 0;    
+    for(int i = 0; i < n; i ++) color[i] = n;   
 	max_color = 0;
 	for(int ii = max_degree; ii >= 1; ii --){
 		for(int jj = head[ii]; jj != n; jj = nxt[jj]){
 			int u = jj;
 			for(int j = offset[u]; j < offset[u+1]; j ++) {
                 int c = color[edge_list[j]];
-                if(c != n) {        // 如果点u的邻居已经被染色了，这个颜色不能用
+                if(c != n) {        
                     cvis[c] = 1;
                 }
 			}
-			for(int j = 0; ; j ++){     // 找一个没被用过的颜色
+			for(int j = 0; ; j ++){     
                 if(!cvis[j]){
-                    color[u] = j;       // 将点u染成颜色j
+                    color[u] = j;       
                     if(j > max_color) max_color = j;
                     break;
 			    }
             }
 			for(int j = offset[u]; j < offset[u + 1]; j ++){
                 int c = color[edge_list[j]];
-                if(c != n) cvis[c] = 0;     // 复原
+                if(c != n) cvis[c] = 0;     
 			}
 		}
 	}
-    // for(int i = 0; i < n; i ++) printf("%d ", color[i]); puts("");
+    
     max_color ++;
     if(cvis != nullptr) delete[] cvis;
     if(head != nullptr) delete[] head;
@@ -260,7 +233,6 @@ void Graph::reColor(){
     return ;
 }
 
-// 用于把已经被删掉的点从一些信息中彻底删除，以节约空间
 void Graph::Node_Contraction(){
     int* node_mapper = new int[n];
     int* tmp = new int[n];
@@ -278,16 +250,10 @@ void Graph::Node_Contraction(){
         to_old_node[new_n] = tmp[i];
         new_n ++;
     }
-    // for(int i = 0; i < m; i ++){
-    //     // if(node_mapper[edge_list[i]] == -1) continue;
-    //     edge_list[i] = node_mapper[edge_list[i]];
-    // }
 
     int lst = 0;
-    // 把一些应该被删除的边删掉
     for(int i = 0; i < new_n; i ++){
         int new_pend = lst;
-        // int new_pend = offset[i];
         for(int j = offset[i]; j < pend[i]; j ++){
             if(node_mapper[edge_list[j]] != -1){
                 edge_list[new_pend ++] = node_mapper[edge_list[j]];
@@ -299,7 +265,6 @@ void Graph::Node_Contraction(){
     }
     m = lst;
 
-    // 将node_cut清零
     for(int i = 0; i < new_n; i ++) node_cut[i] = 0;
     
     n = new_n;
@@ -309,7 +274,7 @@ void Graph::Node_Contraction(){
     return ;
 }
 
-void Graph::get_connected_component(int root, int* vis){   // 找到连通分量，vis=0表示该点还剩下
+void Graph::get_connected_component(int root, int* vis){   
     stack<int> Q;
     Q.push(root);
     vis[root] = 1;
@@ -325,10 +290,10 @@ void Graph::get_connected_component(int root, int* vis){   // 找到连通分量
         }
     }
 }
-// 求当前图的Colorful attribute degree
+
 void Graph::get_colorful_attr_degree(){
-    color_degree = new int* [n];            // color_degree[i][j]表示点i的属性为j的邻居的颜色数
-    int*** colorful_r =  new int** [n];     // colorful_r[i][j][k]表示点i的所有邻居中，属性为j，颜色为k的点的个数
+    color_degree = new int* [n];            
+    int*** colorful_r =  new int** [n];     
     for(int i = 0; i < n; i ++){
         color_degree[i] = new int[attr_size];
         for(int j = 0; j < attr_size; j ++)
@@ -345,7 +310,7 @@ void Graph::get_colorful_attr_degree(){
     for(int i = 0; i < n; i ++){
         for(int j = offset[i]; j < pend[i]; j ++){
             int neighbor = edge_list[j];
-            if(node_cut[neighbor] == 1) continue;        // 说明已经被砍掉了
+            if(node_cut[neighbor] == 1) continue;        
             if(colorful_r[i][attribute[neighbor]][color[neighbor]] == 0){
                 color_degree[i][attribute[neighbor]] ++;
             }
@@ -355,7 +320,7 @@ void Graph::get_colorful_attr_degree(){
     if(colorful_r != nullptr) delete[] colorful_r;
     return ;
 }
-// 求出连通分量的Colorful Degree Ordering
+
 vector<int> Graph::GetColorfulOrdering(){
     int* vis = new int[n];
     for(int i = 0; i < n; i ++) vis[i]=0;
@@ -389,7 +354,7 @@ vector<int> Graph::GetColorfulOrdering(){
         int cnow = component[i];
         for(int j = offset[cnow]; j < pend[cnow]; j ++){
             int nei = edge_list[j];
-            if(vis[nei] == 1)   // 在当前这个连通分量中
+            if(vis[nei] == 1)   
                 if((d[i][attribute[nei]][color[nei]] ++) == 0)
                     r[i][attribute[nei]] ++;
         }
@@ -413,7 +378,7 @@ vector<int> Graph::GetColorfulOrdering(){
         int nod, key;
         heap -> pop_min(nod, key);
         nod = component[nod];
-        //printf("nod=%d, key=%d\n", nod, key);
+        
         peeling_order.push_back(nod);
         vis[nod] = 0;
         for(int j = offset[nod]; j < pend[nod]; j ++){
@@ -424,7 +389,7 @@ vector<int> Graph::GetColorfulOrdering(){
                     if(min_d[idx] > r[idx][attribute[nod]]){
                         int off = min_d[idx] - r[idx][attribute[nod]];
                         min_d[idx] = r[idx][attribute[nod]];
-                        heap -> decrement(idx, off);  // O(1)时间
+                        heap -> decrement(idx, off); 
                     }
                 }
             }
@@ -449,13 +414,9 @@ void Graph::printMRFC_real(){
         printf("[node_id] %d;\t[attr] %d\n", to_old_node[u], attribute[u]);
     } puts("");
 
-    // for(auto u : MRFC_real){
-    //     printf("%d\n", attribute[u]);
-    // } puts("");
-
     return ;
 }
-// 双指针法求
+
 int Graph::calc_intersection(int** edge_set, int scnt0, int scnt1, int* common_neighbor){
     int l = 0, r = 0, totnum = 0;
     while(l < scnt0 && r < scnt1){
