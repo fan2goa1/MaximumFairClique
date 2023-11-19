@@ -4,7 +4,7 @@
 // #define DEBUG
 using namespace std;
 
-struct Sorted_Node{     // 用于进行点的degree(or enhanced colorful degree)的排序
+struct Sorted_Node{     
     int node;
     int degree;
     Sorted_Node(){}
@@ -17,9 +17,8 @@ bool sort_by_degree(Sorted_Node A, Sorted_Node B){
     return A.degree > B.degree;
 }
 
-// 用于判断当前找到的R是否是一个极大的maximal relative fair clique
 bool Graph::IsMaximal(vector<int>& R, int* r_attr){
-    int* ncnt = new int [n];        // ncnt[i]表示R集合中与i相邻的点的个数
+    int* ncnt = new int [n];        
 
     for(auto u : R){
         for(int j = offset[u]; j < pend[u]; j ++){
@@ -30,15 +29,15 @@ bool Graph::IsMaximal(vector<int>& R, int* r_attr){
     }
     bool is_max = 1;
     for(int i = 0; i < n; i ++){
-        if(ncnt[i] == R.size()){        // 说明当前点与R集合中的点都相邻，可以被选
+        if(ncnt[i] == R.size()){        
             if(attribute[i] == 0){
-                if(max(r_attr[0]+1, r_attr[1]) - min(r_attr[0]+1, r_attr[1]) <= delta){ // 说明还能加点
+                if(max(r_attr[0]+1, r_attr[1]) - min(r_attr[0]+1, r_attr[1]) <= delta){ 
                     is_max = 0;
                     break;
                 }
             }
             else {
-                if(max(r_attr[0], r_attr[1]+1) - min(r_attr[0], r_attr[1]+1) <= delta){ // 说明还能加点
+                if(max(r_attr[0], r_attr[1]+1) - min(r_attr[0], r_attr[1]+1) <= delta){ 
                     is_max = 0;
                     break;
                 }
@@ -53,12 +52,12 @@ bool Graph::IsMaximal(vector<int>& R, int* r_attr){
 void Graph::Degree_Heuristic(){
     string type = "Degree";
 
-    vector<int> R;                  // 当前的relative fair clique
-    vector<int>* C = new vector<int> [2];               // C[0]是属性为0的候选，C[1]是属性为1的候选
-    int* r_attr = new int [2];      // r_attr[i]表示当前R集合中属性为i的点数
-    int tar_attr;                   // tar_attr表示将要找的点的属性
-    Sorted_Node* sn = new Sorted_Node [n];  // 用于对点进行排序
-    int* vis = new int [n];         // vis用于寻找标记一个连通分量
+    vector<int> R;                  
+    vector<int>* C = new vector<int> [2];               
+    int* r_attr = new int [2];      
+    int tar_attr;                   
+    Sorted_Node* sn = new Sorted_Node [n];  
+    int* vis = new int [n];         
 
     for(int i = 0; i < n; i ++){
         if(node_cut[i]){
@@ -67,9 +66,9 @@ void Graph::Degree_Heuristic(){
         }
         sn[i] = Sorted_Node(i, pend[i] - offset[i]);
     }
-    sort(sn, sn + n, sort_by_degree);     // 按点从大到小排序
+    sort(sn, sn + n, sort_by_degree);     
 
-    for(int i = 0; i < 1; i ++){         // 分别枚举10个度数最大的点进行Branch
+    for(int i = 0; i < 1; i ++){         
         int max_node = sn[i].node;
         for(int j = 0; j < n; j ++) vis[j] = 0;
         component.clear();
@@ -77,7 +76,7 @@ void Graph::Degree_Heuristic(){
         
         R.clear();  R.push_back(max_node);
         C[0].clear(); C[1].clear();
-        if(attribute[max_node] == 0) r_attr[0] = 1, r_attr[1] = 0;  // 设定初始值
+        if(attribute[max_node] == 0) r_attr[0] = 1, r_attr[1] = 0;  
         else r_attr[0] = 0, r_attr[1] = 1;
         for(int j = offset[max_node]; j < pend[max_node]; j ++){
             int v = edge_list[j];
@@ -93,30 +92,30 @@ void Graph::Degree_Heuristic(){
     if(C != nullptr) delete[] C;
     return ;
 }
-// Colorful Attribute Degree Heuristic算法求maximum fair clique
+
 void Graph::Colorful_Degree_Heuristic(){
-    if(!n) return ;     // 空图直接返回
+    if(!n) return ;     
 
     string type = "Colorful";
-    get_colorful_attr_degree();     // 先计算图的colorful attribute degree
+    get_colorful_attr_degree();     
 
-    vector<int> R;                  // 当前的relative fair clique
-    vector<int>* C = new vector<int> [2];               // C[0]是属性为0的候选，C[1]是属性为1的候选
-    int* r_attr = new int [2];      // r_attr[i]表示当前R集合中属性为i的点数
-    int tar_attr;                   // tar_attr表示将要找的点的属性
-    Sorted_Node* sn = new Sorted_Node [n];  // 用于对点进行排序
-    int* vis = new int [n];         // vis用于寻找标记一个连通分量
+    vector<int> R;                 
+    vector<int>* C = new vector<int> [2];               
+    int* r_attr = new int [2];      
+    int tar_attr;                   
+    Sorted_Node* sn = new Sorted_Node [n];  
+    int* vis = new int [n];         
 
     for(int i = 0; i < n; i ++){
         if(node_cut[i]){
             sn[i] = Sorted_Node(i, 0);
             continue;
         }
-        sn[i] = Sorted_Node(i, min(color_degree[i][0], color_degree[i][1]));         // 将min(color_degree[i][0], color_degree[i][1])放入
+        sn[i] = Sorted_Node(i, min(color_degree[i][0], color_degree[i][1]));         
     }
-    sort(sn, sn + n, sort_by_degree);     // 按点从大到小排序
+    sort(sn, sn + n, sort_by_degree);     
 
-    for(int i = 0; i < 1; i ++){         // 分别枚举10个度数最大的点进行Branch
+    for(int i = 0; i < 1; i ++){         
         int max_node = sn[i].node;
         for(int j = 0; j < n; j ++) vis[j] = 0;
         component.clear();
@@ -124,7 +123,7 @@ void Graph::Colorful_Degree_Heuristic(){
         
         R.clear();  R.push_back(max_node);
         C[0].clear(); C[1].clear();
-        if(attribute[max_node] == 0) r_attr[0] = 1, r_attr[1] = 0;  // 设定初始值
+        if(attribute[max_node] == 0) r_attr[0] = 1, r_attr[1] = 0;  
         else r_attr[0] = 0, r_attr[1] = 1;
         for(int j = offset[max_node]; j < pend[max_node]; j ++){
             int v = edge_list[j];
@@ -142,39 +141,33 @@ void Graph::Colorful_Degree_Heuristic(){
 }
 
 void Graph::HeuBranch(vector<int>& R, vector<int>* C, int* r_attr, int tar_attr, int a_min, string type){
-    // cout << R.size() << endl; for (auto u: R) cout << u << ": "; cout << endl; cout.flush();
     if(R.size() > MRFC_heu.size()){
         MRFC_heu = R;
     }
 
-    if(R.size() + C[0].size() + C[1].size() <= MRFC_heu.size()) return;  // 说明当前搜索到的结果已经不可能比当前最优解更优了
-    if(C[0].size() + C[1].size() == 0){         // 此时候选集为空，搜索到底
+    if(R.size() + C[0].size() + C[1].size() <= MRFC_heu.size()) return;  
+    if(C[0].size() + C[1].size() == 0){         
         if(R.size() > MRFC_heu.size()){
             MRFC_heu = R;
-            // cout << "Find a new MRFC with size " << MRFC_heu.size() << endl;
-            // for(auto u : MRFC_heu) cout << to_old_node[u] << " "; puts("");
         }
         return;
     }
-    if(a_min != -1 && r_attr[tar_attr] == a_min + delta){       // 说明加到上限不能再加了
+    if(a_min != -1 && r_attr[tar_attr] == a_min + delta){       
         if(R.size() > MRFC_heu.size()){
             MRFC_heu = R;
-            // cout << "Find a new MRFC with size " << MRFC_heu.size() << endl;
-            // for(auto u : MRFC_heu) cout << to_old_node[u] << " "; puts("");
         }
         return ;
     }
 
-    if(C[tar_attr].size() == 0){        // 当前要找的属性的候选集为空，说明要找的属性已经找完了，转而找另一个属性
-        a_min = r_attr[tar_attr];       // 设置属性个数的下限，上限a_max = a_min + delta
+    if(C[tar_attr].size() == 0){        
+        a_min = r_attr[tar_attr];       
         tar_attr = 1 - tar_attr;
         HeuBranch(R, C, r_attr, tar_attr, a_min, type);
         return ;
     }
 
-    // 寻找degree最大的点加入R
     int max_deg = 0, max_node = -1;
-    if(type == "Degree"){           // 以degree选最大的点
+    if(type == "Degree"){           
         for(auto u : C[tar_attr]){
             if(pend[u] - offset[u] > max_deg){
                 max_deg = pend[u] - offset[u];
@@ -182,7 +175,7 @@ void Graph::HeuBranch(vector<int>& R, vector<int>* C, int* r_attr, int tar_attr,
             }
         }
     }
-    else if(type == "Colorful"){        // 以Colorful attribute degree选最大的点
+    else if(type == "Colorful"){        
         for(auto u : C[tar_attr]){
             int cd = min(color_degree[u][0], color_degree[u][1]);
             if(cd > max_deg){
@@ -194,7 +187,6 @@ void Graph::HeuBranch(vector<int>& R, vector<int>* C, int* r_attr, int tar_attr,
     R.push_back(max_node);
     r_attr[tar_attr] ++;
 
-    // 更新候选集
     set<int> tmp_set, tmp_res;
     set<int> nei;
     int ccnt0 = 0, ccnt1 = 0;
@@ -226,18 +218,18 @@ void Graph::HeuBranch(vector<int>& R, vector<int>* C, int* r_attr, int tar_attr,
         else ccnt1 ++;
     }
 
-    if(R.size() + C[0].size() + C[1].size() < threshold * 2) return;  // 说明总点数不够
-    if((r_attr[0] + ccnt0 < threshold) || (r_attr[1] + ccnt1 < threshold)) return;  // 说明有一个属性的点数不够k，找不到RFC了
+    if(R.size() + C[0].size() + C[1].size() < threshold * 2) return;  
+    if((r_attr[0] + ccnt0 < threshold) || (r_attr[1] + ccnt1 < threshold)) return;  
 
-    HeuBranch(R, C, r_attr, 1-tar_attr, a_min, type);  // 接着往下找
-    r_attr[tar_attr] --;    // 回溯
+    HeuBranch(R, C, r_attr, 1-tar_attr, a_min, type);  
+    r_attr[tar_attr] --;    
 
     return;
 }
-// Alg9 Heuristic Framework
+// Alg: Heuristic Framework
 int Graph::Find_MRFC_Heuristic(){
     MRFC_heu.clear();
-    Degree_Heuristic();             // 找到用度数排序得到的当前MRFC
+    Degree_Heuristic();            
 
     int* cnt = new int[2];
     cnt[0] = cnt[1] = 0;
@@ -246,22 +238,22 @@ int Graph::Find_MRFC_Heuristic(){
     int k_star = MRFC_heu.size()-1;
     int k_cast = 0;
     
-    // K_Core_Reduction(k_star);         // 计算K-Core
+    // K_Core_Reduction(k_star);         
     Node_Contraction();
     // printf("k_star: %d\n", k_star);
 
     vector<int> now_MRFC = MRFC_heu;
-    Colorful_Degree_Heuristic();    // 再用Colorful degree排序试找更大的MRFC
-    if(MRFC_heu.size() > now_MRFC.size()){  // 说明找到了更大的MRFC
+    Colorful_Degree_Heuristic();    
+    if(MRFC_heu.size() > now_MRFC.size()){  
         cnt[0] = cnt[1] = 0;
         for(auto u : MRFC_heu) cnt[attribute[u]] ++;
         // k_cast = max(cnt[0], cnt[1]) - delta;
         k_cast = MRFC_heu.size()-1;
         // printf("k_cast: %d\n", k_cast);
-        K_Core_Reduction(k_cast);         // 计算K-Core
+        K_Core_Reduction(k_cast);         
         Node_Contraction();
     }
-    reColor();      // 重新着色
+    reColor();      
     int ub = max_color;
     have_ans = 1;
     delete[] cnt;
