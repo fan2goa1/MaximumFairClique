@@ -48,7 +48,7 @@ bool Graph::IsMaximal(vector<int>& R, int* r_attr){
     if(ncnt != nullptr) delete[] ncnt;
     return is_max;
 }
-// Degree Heuristic算法求maximum fair clique
+
 void Graph::Degree_Heuristic(){
     string type = "Degree";
 
