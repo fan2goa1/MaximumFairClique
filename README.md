@@ -1,6 +1,6 @@
 # Maximum Fair Clique
 
-This paper proposes a new high-order subgraph model for a binary attribute graph, the Relative Fair Clique, based on the concept of a Clique. The purpose of this paper is to find the Maximum Fair Clique in large graphs.
+This is the repository corresponding to the paper "Efficient Maximum Fair Clique Search over Large Networks". This paper proposes a new high-order subgraph model for a binary attribute graph, the Relative Fair Clique, based on the concept of Clique. The purpose of this paper is to find the Maximum Fair Clique in large graphs.
 
 ## Code Structure
 
