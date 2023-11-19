@@ -6,7 +6,6 @@ using namespace std;
 
 // Alg1, Colorful attribute-degree reduction
 void Graph::Colorful_Degree_Reduction(){
-    // 计算Colorful attribute-degree
     printf("Start Colorful degree reduction...\n");
     
     if(!preprocessed){Preprocess(); preprocessed = 1;}
@@ -16,9 +15,8 @@ void Graph::Colorful_Degree_Reduction(){
         return ;
     }
 
-    // 计算Colorful attribute-degree
-    int** colorful_d = new int* [n]; // colorful_d[i][j]表示点i的属性为j的邻居的颜色数
-    int*** colorful_r =  new int** [n];     // colorful_r[i][j][k]表示点i的所有邻居中，属性为j，颜色为k的点的个数
+    int** colorful_d = new int* [n]; 
+    int*** colorful_r =  new int** [n];    
     for(int i = 0; i < n; i ++){
         colorful_d[i] = new int[attr_size];
         for(int j = 0; j < attr_size; j ++)
@@ -35,7 +33,7 @@ void Graph::Colorful_Degree_Reduction(){
     for(int i = 0; i < n; i ++){
         for(int j = offset[i]; j < pend[i]; j ++){
             int neighbor = edge_list[j];
-            if(node_cut[neighbor] == 1) continue;        // 说明已经被砍掉了
+            if(node_cut[neighbor] == 1) continue;        
             if(colorful_r[i][attribute[neighbor]][color[neighbor]] == 0){
                 colorful_d[i][attribute[neighbor]] ++;
             }
@@ -43,7 +41,6 @@ void Graph::Colorful_Degree_Reduction(){
         }
     }
 
-    // 删除Colorful attribute-degree小于阈值的点
     queue<int> Q;   //Q is the set to delete
     int deletenode = 0;
     for(int i = 0; i < n; i ++){
@@ -85,7 +82,7 @@ void Graph::Colorful_Degree_Reduction(){
 
                 if(deletenode == 1){
                     Q.push(neighbor);
-                    node_cut[neighbor] = 1;      // 标记该点被删
+                    node_cut[neighbor] = 1;      
                 }
             }
         }
@@ -107,7 +104,7 @@ void Graph::Colorful_Degree_Reduction(){
         delete[] colorful_d;
     }
 
-    // 重建图
+    // re-construct the graph
     int startpos = 0;
     for(int i = 0; i < n; i ++){
         if(!node_cut[i]){
@@ -121,11 +118,11 @@ void Graph::Colorful_Degree_Reduction(){
             pend[i] = startpos;
         }
         else{
-            offset[i] = pend[i] = 0;        // 被删除的点的offset和pend都置为0
+            offset[i] = pend[i] = 0;        
         }
     }
-    m = startpos;           // 更新边数
-    offset[n] = pend[n] = 0;                // n的offset和pend也置为0
+    m = startpos;           
+    offset[n] = pend[n] = 0;                
     
     printf("Colorful degree reduction done!\n");
     return ;
@@ -141,9 +138,9 @@ void Graph::Colorful_Support_Reduction(){
         return ;
     }
 
-    int** colorful_d = new int* [m]; // colorful_d[i][j]表示边i的属性为j的邻居的颜色数
-    int*** colorful_r =  new int** [m];     // colorful_r[i][j][k]表示边i的所有邻居中，属性为j，颜色为k的点的个数
-    int* edge_cut = new int [m];   // edge_retain[i]表示第i条边是否被删掉（在reduced_graph中） 注：这里是无向图的边的下标<u, v>(u<v)
+    int** colorful_d = new int* [m]; // colorful_d[i][j] represents the number of colors of neighbors with attribute j for the edge i.
+    int*** colorful_r =  new int** [m];     // colorful_r[i][j][k] represents the count of nodes with attribute j and color k among all neighbors of edge i.
+    int* edge_cut = new int [m];   // edge_retain[i] indicates whether the i-th edge has been removed (in the reduced graph)
     
     for(int i = 0; i < m; i ++){
         colorful_d[i] = new int[attr_size];
@@ -158,12 +155,9 @@ void Graph::Colorful_Support_Reduction(){
                 colorful_r[i][j][k] = 0;
         }
     }
-    // printf("%lld MB\n", 1ll * sizeof(int) * m * attr_size * max_color / 1024 / 1024);
     for(int i = 0; i < m; i ++) edge_cut[i] = 0;
     
-    // set<int> edge_set[n+1];
     unordered_edge.clear();
-    // 把每个点的连边装到set里用于求交集, 初始化unordered_edge
     for(int i = 0; i < n; i ++){
         if(node_cut[i]) continue;
         for(int j = offset[i]; j < pend[i]; j ++){
@@ -173,37 +167,28 @@ void Graph::Colorful_Support_Reduction(){
         }
     }
 
-    // set<int> edge_set[2];
     int** edge_set = new int* [2];
     int scnt0 = 0, scnt1 = 0;
     for(int i = 0; i < attr_size; i ++) edge_set[i] = new int [n];
-    // 计算colorful_d和colorful_r
     for(int i = 0; i < n; i ++){
         if(node_cut[i]) continue;
         int u = i;
         for(int j = offset[u]; j < pend[u]; j ++){
             int v = edge_list[j]; if(node_cut[v]) continue;
-            // printf("%d %d\n", u, v);
-            if(u > v) continue;     // 只枚举u<v的情况，防止重复枚举
-            // printf("<%d, %d>\n", u, v);
-            // edge_set[0].clear(); edge_set[1].clear();
+            if(u > v) continue;
             scnt0 = scnt1 = 0;
             for(int k = offset[u]; k < pend[u]; k ++){
                 int w = edge_list[k];
                 if(w <= u || w <= v || node_cut[w]) continue;
-                // edge_set[0].insert(w);
                 edge_set[0][scnt0 ++] = w;
             }
             for(int k = offset[v]; k < pend[v]; k ++){
                 int w = edge_list[k];
                 if(w <= u || w <= v || node_cut[w]) continue;
-                // edge_set[1].insert(w);
                 edge_set[1][scnt1 ++] = w;
             }
-            // set<int> common_neighbor = intersection(edge_set[0], edge_set[1]); // 求交集
             int* common_neighbor = new int [n];
             int common_size = calc_intersection(edge_set, scnt0, scnt1, common_neighbor);
-            // 找到的w都是u < v < w，保证每个三角形只被枚举一次
             #ifdef DEBUG
                 printf("<%d, %d> common_neighbor: ", u, v);
                 for(auto w: common_neighbor) printf("%d ", w);
@@ -211,7 +196,6 @@ void Graph::Colorful_Support_Reduction(){
             #endif
             for(int ll = 0; ll < common_size; ll ++){
                 int w = common_neighbor[ll];
-                // 计算Alg 2的5-6行
                 if(colorful_r[j][attribute[w]][color[w]] == 0){
                     colorful_d[j][attribute[w]] ++;
                 }
@@ -234,7 +218,6 @@ void Graph::Colorful_Support_Reduction(){
         }
     }
 
-    // 将sup不达标的都删除
     queue<pair<int, int> > Q;
     bool* in_queue = new bool [m];
     int deleteedge = 0;
@@ -245,7 +228,7 @@ void Graph::Colorful_Support_Reduction(){
         for(int j = offset[u]; j < pend[u]; j ++){
             int v = edge_list[j];
             if(node_cut[v]) continue;
-            if(u >= v) continue;        // 为保证不重复，只枚举u<v的边
+            if(u >= v) continue;       
             deleteedge = 0;
             if(attribute[u] == 0 && attribute[v] == 0){
                 if(colorful_d[j][0] < threshold - 2 || colorful_d[j][1] < threshold)
@@ -265,27 +248,21 @@ void Graph::Colorful_Support_Reduction(){
             }
         }
     }
-    // for(int i = offset[66]; i < pend[66];i ++) printf("%d ", edge_list[i]); puts("");
-    // for(int i = offset[77]; i < pend[77];i ++) printf("%d ", edge_list[i]); puts("");
 
     while(!Q.empty()){
         pair<int, int> qedge = Q.front(); Q.pop();
         int u = qedge.first, v = edge_list[qedge.second];
         int u1, v1, w1;
         edge_cut[qedge.second] = edge_cut[unordered_edge[v][u]] = 1;
-        // edge_set[0].clear(); edge_set[1].clear();
         scnt0 = scnt1 = 0;
         for(int k = offset[u]; k < pend[u]; k ++){
             if(edge_cut[k]) continue;
-            // edge_set[0].insert(edge_list[k]);
             edge_set[0][scnt0 ++] = edge_list[k];
         }
         for(int k = offset[v]; k < pend[v]; k ++){
             if(edge_cut[k]) continue;
-            // edge_set[1].insert(edge_list[k]);
             edge_set[1][scnt1 ++] = edge_list[k];
         }
-        // set<int> common_neighbor = intersection(edge_set[0], edge_set[1]); // 求交集
         int* common_neighbor = new int [n];
         int common_size = calc_intersection(edge_set, scnt0, scnt1, common_neighbor);
         for(int ll = 0; ll < common_size; ll ++){
@@ -367,8 +344,6 @@ void Graph::Colorful_Support_Reduction(){
     }
     if(in_queue != nullptr) delete[] in_queue;
 
-
-    // 重建图(这轮没有删点，只进行了删边)
     int startpos = 0;
     for(int i = 0; i < n; i ++){
         if(node_cut[i]){offset[i] = pend[i] = 0; continue;}
@@ -378,7 +353,7 @@ void Graph::Colorful_Support_Reduction(){
             int v = edge_list[j];
             if(node_cut[v]) continue;
             int u1 = min(u, v), v1 = max(u, v);
-            if(!edge_cut[unordered_edge[u1][v1]]){  // 如果这条边没有被删掉
+            if(!edge_cut[unordered_edge[u1][v1]]){  
                 edge_list[startpos ++] = v;
             }
         }
@@ -387,12 +362,12 @@ void Graph::Colorful_Support_Reduction(){
     }
     for(int i = 0; i < n; i ++){
         if(node_cut[i]) continue;
-        if(offset[i] == pend[i]){       // 说明这个点的所有连边都已经被删掉，则把该点也删掉
+        if(offset[i] == pend[i]){       
             node_cut[i] = 1;
             offset[i] = pend[i] = 0;
         }
     }
-    m = startpos;       // 更新m
+    m = startpos;      
     if(edge_cut != nullptr) delete[] edge_cut;
 
     printf("Colorful Support Reduction done!\n");
@@ -409,7 +384,7 @@ void Graph::Enhanced_Colorful_Degree_Reduction(){
         return ;
     }
 
-    int*** cntGroup = new int** [n];  // cntGroup[i][j][k]表示点i的邻居中颜色为j，属性为k的数量
+    int*** cntGroup = new int** [n];  // cntGroup[i][j][k] represents the count of neighbors of node i with color j and attribute k.
     int* c1 = new int [n];          // c1[i]-> number of groups of attribute 0 for i's neighbors
     int* c2 = new int [n];          // c2[i]-> number of groups of attribute 1 for i's neighbors
     int* cboth = new int [n];
@@ -433,43 +408,36 @@ void Graph::Enhanced_Colorful_Degree_Reduction(){
         }
         for(int j = 0; j < max_color; j ++){
             int cc0 = cntGroup[i][j][0], cc1 = cntGroup[i][j][1];
-            if(cc0 > 0 && cc1 == 0) c1[i] ++;           // 说明当前颜色的所有邻居都为属性a
+            if(cc0 > 0 && cc1 == 0) c1[i] ++;           
             else if(cc0 == 0 && cc1 > 0) c2[i] ++;
             else if(cc0 > 0 && cc1 > 0) cboth[i] ++;
         }
-        if(attribute[i] == 0){      // 把i自己算上
+        if(attribute[i] == 0){      
             c1[i] ++;
         }
         else c2[i] ++;
     }
 
-    // 打印每个点的c1 c2 cboth
-    // for(int i = 0; i < n; i ++){
-    //     if(node_cut[i]) continue;
-    //     printf("node %d: c1 = %d, c2 = %d, cboth = %d\n", i, c1[i], c2[i], cboth[i]);
-    // }
-
     queue<int> Q;
     for(int i = 0; i < n; i ++){
         if(node_cut[i]) continue;
         int need = cboth[i] - max(0, threshold-c1[i]) - max(0, threshold-c2[i]);
-        if(need < 0){           // 该点的ED不能满足要求
+        if(need < 0){          
             Q.push(i);
             node_cut[i] = 1;
         }
     }
     while(!Q.empty()){
         int u = Q.front(); Q.pop();
-        // printf("%d\n", u);
         for(int i = offset[u]; i < pend[u]; i ++){
             int v = edge_list[i];
             if(node_cut[v]) continue;
             if((-- cntGroup[v][color[u]][attribute[u]]) <= 0){
-                if(cntGroup[v][color[u]][attribute[u] ^ 1] == 0){   // 说明该颜色的所有邻居本来只有一种属性
+                if(cntGroup[v][color[u]][attribute[u] ^ 1] == 0){   
                     if(attribute[u] == 0) c1[v] --;
                     else c2[v] --;
                 }
-                else {          // 说明该颜色的所有邻居本来有2种属性
+                else {         
                     cboth[v] --;
                     if(attribute[u] == 0) c2[v] ++;
                     else c1[v] ++;
@@ -496,7 +464,6 @@ void Graph::Enhanced_Colorful_Degree_Reduction(){
     if(c2 != nullptr) delete[] c2;
     if(cboth != nullptr) delete[] cboth;
 
-    // 重建图
     int startpos = 0;
     for(int i = 0; i < n; i ++){
         if(!node_cut[i]){
@@ -510,11 +477,11 @@ void Graph::Enhanced_Colorful_Degree_Reduction(){
             pend[i] = startpos;
         }
         else{
-            offset[i] = pend[i] = 0;        // 被删除的点的offset和pend都置为0
+            offset[i] = pend[i] = 0;        
         }
     }
-    m = startpos;           // 更新边数
-    offset[n] = pend[n] = 0;                // n的offset和pend也置为0
+    m = startpos;          
+    offset[n] = pend[n] = 0;                
 
     cout << "Enhanced Colorful Degree Reduction done!" << endl;
     cout.flush();
@@ -526,7 +493,6 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
     cout.flush();
 
     if(!preprocessed){Preprocess(); preprocessed = 1;}
-    // Node_Contraction();
 
     if(!n || !m){
         cout << "Graph is empty!" << endl;
@@ -534,10 +500,10 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
         return ;
     }
 
-    int*** cntGroup = new int** [m];  // cntGroup[i][j][k]表示边i的共同邻居中颜色为j，属性为k的点的数量
-    int* c1 = new int [m];          // c1[i]表示对于边i，有多少个颜色，其所有该颜色的共同邻居属性均为0
-    int* c2 = new int [m];          // c2[i]表示对于边i，有多少个颜色，其所有该颜色的共同邻居属性均为1
-    int* cboth = new int [m];       // cboth[i]表示对于边i，有多少个颜色，其所有该颜色的共同邻居属性既有0也有1
+    int*** cntGroup = new int** [m];  
+    int* c1 = new int [m];          
+    int* c2 = new int [m];          
+    int* cboth = new int [m];      
     for(int i = 0; i < m; i ++){
         cntGroup[i] = new int* [max_color];
         for(int j = 0; j < max_color; j ++){
@@ -551,21 +517,17 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
     int* edge_cut = new int [m];
     for(int i = 0; i < m; i ++) edge_cut[i] = 0;
     
-    // set<int> edge_set[2];
     int** edge_set = new int* [2];
     int scnt0 = 0, scnt1 = 0;
     for(int i = 0; i < attr_size; i ++) edge_set[i] = new int [n];
     
     unordered_edge.clear();
-    // 把每个点的连边装到set里用于求交集, 初始化unordered_edge
     for(int i = 0; i < n; i ++){
         if(node_cut[i]) continue;
         for(int j = offset[i]; j < pend[i]; j ++){
-            // edge_set[i].insert(edge_list[j]);
             unordered_edge[i][edge_list[j]] = j;
         }
     }
-    // 计算ED(u, v)
     for(int i = 0; i < n; i ++){
         if(node_cut[i]) continue;
         int u = i;
@@ -573,23 +535,18 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
             int v = edge_list[j];
             if(node_cut[v]) continue;
             // printf("%d %d\n", u, v);
-            if(u >= v) continue;     // 只枚举u<v的情况，防止重复枚举
-            // 枚举 u < v < w 的三角形，一个三角形只被枚举一次，贡献三次
-            // edge_set[0].clear(); edge_set[1].clear();
+            if(u >= v) continue;    
             scnt0 = scnt1 = 0;
             for(int k = offset[u]; k < pend[u]; k ++){
                 int w = edge_list[k];
                 if(node_cut[w] || w <= u || w <= v) continue;
-                // edge_set[0].insert(w);
                 edge_set[0][scnt0 ++] = w;
             }
             for(int k = offset[v]; k < pend[v]; k ++){
                 int w = edge_list[k];
                 if(node_cut[w] || w <= u || w <= v) continue;
-                // edge_set[1].insert(w);
                 edge_set[1][scnt1 ++] = w;
             }
-            // set<int> common_neighbor = intersection(edge_set[0], edge_set[1]); // 求交集
             int* common_neighbor = new int [n];
             int common_size = calc_intersection(edge_set, scnt0, scnt1, common_neighbor);
             for(int ll = 0; ll < common_size; ll ++){
@@ -602,20 +559,19 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
             if(common_neighbor != nullptr) delete[] common_neighbor;
         }
     }
-    // 将不达标的ED放入队列Q
     queue<pair<int, int> > Q;
     bool* in_queue = new bool [m];
     for(int i = 0; i < m; i ++) in_queue[i] = 0;
     for(int i = 0; i < n; i ++){
         if(node_cut[i]) continue;
         int u = i;
-        for(int j = offset[u]; j < pend[u]; j ++){  // 枚举每条边，只枚举一次
+        for(int j = offset[u]; j < pend[u]; j ++){  
             int v = edge_list[j];
             if(node_cut[v]) continue;
             if(u >= v) continue;
             for(int k = 0; k < max_color; k ++){
                 int cc0 = cntGroup[j][k][0], cc1 = cntGroup[j][k][1];
-                if(cc0 > 0 && cc1 == 0) c1[j] ++;           // 说明当前颜色的所有共同邻居都为属性a
+                if(cc0 > 0 && cc1 == 0) c1[j] ++;           
                 else if(cc0 == 0 && cc1 > 0) c2[j] ++;
                 else if(cc0 > 0 && cc1 > 0) cboth[j] ++;
             }
@@ -628,7 +584,6 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
             if(need < 0){
                 Q.push(make_pair(u, j));
                 in_queue[j] = 1;
-                // printf("%d %d\n", u, v);
             }
         }
     }
@@ -637,25 +592,21 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
         pair<int, int> qedge = Q.front(); Q.pop();
         int u = qedge.first, v = edge_list[qedge.second];
         
-        edge_cut[qedge.second] = edge_cut[unordered_edge[v][u]] = 1;    // 将删边标记置为1
+        edge_cut[qedge.second] = edge_cut[unordered_edge[v][u]] = 1;    
 
-        // edge_set[0].clear(); edge_set[1].clear();
         scnt0 = scnt1 = 0;
         for(int k = offset[u]; k < pend[u]; k ++){
             if(edge_cut[k]) continue;
-            // edge_set[0].insert(edge_list[k]);
             edge_set[0][scnt0 ++] = edge_list[k];
         }
         for(int k = offset[v]; k < pend[v]; k ++){
             if(edge_cut[k]) continue;
-            // edge_set[1].insert(edge_list[k]);
             edge_set[1][scnt1 ++] = edge_list[k];
         }       
        
-        // set<int> common_neighbor = intersection(edge_set[0], edge_set[1]); // 求交集
         int* common_neighbor = new int [n];
         int common_size = calc_intersection(edge_set, scnt0, scnt1, common_neighbor);
-        for(int ll = 0; ll < common_size; ll ++){       // 枚举公共邻居
+        for(int ll = 0; ll < common_size; ll ++){       
             int w = common_neighbor[ll];
             if(node_cut[w]){
                 continue;
@@ -663,14 +614,14 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
             int u1, v1, w1;
             u1 = min(u, w); w1 = max(u, w);
             int j1 = unordered_edge[u1][w1];
-            if(!edge_cut[j1]){      // 讨论边<u, w>的情况
+            if(!edge_cut[j1]){      
                 cntGroup[j1][color[v]][attribute[v]] --;
                 if(cntGroup[j1][color[v]][attribute[v]] == 0){
-                    if(cntGroup[j1][color[v]][attribute[v] ^ 1] == 0){    // 说明这种颜色本来就只有一种属性
+                    if(cntGroup[j1][color[v]][attribute[v] ^ 1] == 0){   
                         if(attribute[v] == 0) c1[j1] --;
                         else c2[j1] --;
                     }
-                    else {          // 说明这种颜色本来有两种属性
+                    else {          
                         cboth[j1] --;
                         if(attribute[v] == 0) c2[j1] ++;
                         else c1[j1] ++;
@@ -680,19 +631,18 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
                 if(need < 0 && !in_queue[j1]){
                     Q.push(make_pair(u1, j1));
                     in_queue[j1] = 1;
-                    // printf("%d %d\n", u1, w1);
                 }
             }
             v1 = min(v, w); w1 = max(v, w);
             int j2 = unordered_edge[v1][w1];
-            if(!edge_cut[j2]){      // 讨论边<v, w>的情况
+            if(!edge_cut[j2]){      
                 cntGroup[j2][color[u]][attribute[u]] --;
                 if(cntGroup[j2][color[u]][attribute[u]] == 0){
-                    if(cntGroup[j2][color[u]][attribute[u] ^ 1] == 0){    // 说明这种颜色本来就只有一种属性
+                    if(cntGroup[j2][color[u]][attribute[u] ^ 1] == 0){    
                         if(attribute[u] == 0) c1[j2] --;
                         else c2[j2] --;
                     }
-                    else {          // 说明这种颜色本来有两种属性
+                    else {          
                         cboth[j2] --;
                         if(attribute[u] == 0) c2[j2] ++;
                         else c1[j2] ++;
@@ -702,7 +652,6 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
                 if(need < 0 && !in_queue[j2]){
                     Q.push(make_pair(v1, j2));
                     in_queue[j2] = 1;
-                    // printf("%d %d\n", v1, w1);
                 }
             }
         }
@@ -725,12 +674,6 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
     if(cboth != nullptr) delete[] cboth;
     if(in_queue != nullptr) delete[] in_queue;
 
-    // int ccc = 0;
-    // for(int i = 0; i < m; i ++)
-    //     if(edge_cut[i]) ccc ++;
-    // printf("cutting %d edges.", ccc);
-
-    // 重建图(这轮没有删点，只进行了删边)
     int startpos = 0;
     for(int i = 0; i < n; i ++){
         if(node_cut[i]) continue;
@@ -739,7 +682,7 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
         for(int j = offset[i]; j < pend[i]; j ++){
             int v = edge_list[j];
             if(node_cut[v]) continue;
-            if(!edge_cut[unordered_edge[u][v]]){  // 如果这条边没有被删掉
+            if(!edge_cut[unordered_edge[u][v]]){  
                 edge_list[startpos ++] = v;
             }
         }
@@ -748,19 +691,19 @@ void Graph::Enhanced_Colorful_Support_Reduction(){
     }
     for(int i = 0; i < n; i ++){
         if(node_cut[i]) continue;
-        if(offset[i] == pend[i]){       // 说明这个点的所有连边都已经被删掉，则把该点也删掉
+        if(offset[i] == pend[i]){       
             node_cut[i] = 1;
             offset[i] = pend[i] = 0;
         }
     }
-    m = startpos;       // 更新m
-    offset[n] = pend[n] = 0;                // n的offset和pend也置为0
+    m = startpos;       
+    offset[n] = pend[n] = 0;                
     if(edge_cut != nullptr) delete[] edge_cut;
 
     printf("Enhanced Colorful Support Reduction done!\n");
     return ;
 }
-// 求当前图的K-Core
+
 void Graph::K_Core_Reduction(int level){
     queue<int> Q;
     int* degree = new int [n];
