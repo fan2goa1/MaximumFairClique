@@ -6,34 +6,34 @@ using namespace std;
 
 class Graph{
     private:
-    int n, m;           // 图的点数和边数
-    int threshold;      // 输入中的k
-    int attr_size;      // 属性数量，在这里恒为2
-    int delta;          // 输入中的delta
-    int max_color;      // 对图染色的总颜色数
-    int preprocessed;   // 0表示未对图进行染色
-    bool have_ans;      // 1表示已经找到答案
+    int n, m;           // number of node and edges
+    int threshold;      // k in paper
+    int attr_size;      // it's a constant of 2 here
+    int delta;          
+    int max_color;     
+    int preprocessed;   // 0 represents whether the graph has been colored
+    bool have_ans;      // 1 reparesents anwser is already found
 
-    int* offset;        // offset[i]表示第i个节点的所有边在edge_list中的起始位置
-    int* pend;          // pend[i]表示第i个节点的所有边在edge_list中的终止位置
-    int* edge_list;     // edge_list[i]表示第i条边的另一端节点
-    int* attribute;     // attribute[i]表示第i个点的属性标号
-    int* color;         // color[i]表示第i个点的颜色标号
-    int* node_cut;      // node_retain[i]表示第i个点是否被删掉（在reduced_graph中）
-    int* enhanced_degree;   // enhanced_degree[i]表示第i个点的ED
-    int* to_old_node;       // to_old_node[i]表示当前点i对应原图中的点的编号
-    int** color_degree;     // color_degree[i][j]表示点i的属性j的colorful degree
-    int* RCvis;             // 1表示当前点在R或C中，0表示不在
-    int* nvis;              // 判断相邻节点，1为相邻
+    int* offset;        // offset[i] indicates the starting position in the edge_list for all edges associated with the i-th node.
+    int* pend;          // pend[i] represents the ending position in the edge_list for all edges associated with the i-th node.
+    int* edge_list;     // edge_list[i] represents the other end node of the i-th edge.
+    int* attribute;     
+    int* color;         
+    int* node_cut;      // node_retain[i] indicates whether the i-th node has been removed (in the reduced graph).
+    int* enhanced_degree;   // enhanced_degree[i] represents the enhanced degree (ED) of the i-th node.
+    int* to_old_node;       
+    int** color_degree;     // color_degree[i][j] represents the colorful degree of attribute j for the node i.
+    int* RCvis;            
+    int* nvis;             
 
-    unordered_map<int, unordered_map<int, int> > unordered_edge;  // unorderd_edge[u][v](u<v)记录该边对应的edge_list的下标
-    vector<int> component;  // reduced Graph里某个点的连通分量
+    unordered_map<int, unordered_map<int, int> > unordered_edge;  // unordered_edge[u][v] (u < v) records the index of the edge in the edge_list corresponding to this pair of vertices.
+    vector<int> component;  // Connected component of a particular node in the reduced graph
     vector<int> MRFC_heu;       // Maximum Relative Fair Clique by heuristic algorithm
     vector<int> MRFC_real;      // Maximum Relative Fair Clique by baseline algorithm
 
 
     public:
-    string alg_type;        // 记录是baseline还是ub还是heuristic
+    string alg_type;        // baseline or ub or heuristic
     // in Graph_utils.cpp
     Graph();
     ~Graph();
@@ -64,22 +64,22 @@ class Graph{
     int Find_MRFC_Heuristic();
 
     // in Graph_ub.cpp
-    bool calc_base(vector<int> &, vector<int>*);        // baseline 计算上届
-    bool calc_ub(vector<int> &, vector<int>*);         // ub 计算上界，并判断是否被剪枝
-    int ub_size(vector<int> &, vector<int>*);          // 求Size based upper bound
-    int ub_color(vector<int> &, vector<int>*);         // 求Color based upper bound
-    int ub_attr(vector<int> &, vector<int>*);          // 求Attribute based upper bound
-    int ub_attr_color(vector<int> &, vector<int>*, vector<int> *);    // 求Attribute color based upper bound
-    int ub_new(vector<int> &, vector<int>*);             // 求New based upper bound
-    int ub_degeneracy(vector<int> &, vector<int>*, int*, int);    // 求Degeneracy based upper bound
-    int ub_color_degeneracy(vector<int> &, vector<int>*, int*, int);  // 求Color degeneracy based upper bound
-    int ub_h_index(vector<int>*, int*);       // 求H-index based upper bound
-    int ub_color_h_index(vector<int>*, int*); // 求Color H-index based upper bound
-    int ub_colorful_path(vector<int> &, vector<int>*); // 求Colorful path based upper bound
-    int ub_colorful_triangle(vector<int> &, vector<int>*); // 求Colorful triangle based upper bound
+    bool calc_base(vector<int> &, vector<int>*);        // baseline
+    bool calc_ub(vector<int> &, vector<int>*);         
+    int ub_size(vector<int> &, vector<int>*);          // Size based upper bound
+    int ub_color(vector<int> &, vector<int>*);         // Color based upper bound
+    int ub_attr(vector<int> &, vector<int>*);          // Attribute based upper bound
+    int ub_attr_color(vector<int> &, vector<int>*, vector<int> *);    // Attribute color based upper bound
+    int ub_new(vector<int> &, vector<int>*);             // New based upper bound
+    int ub_degeneracy(vector<int> &, vector<int>*, int*, int);    // Degeneracy based upper bound
+    int ub_color_degeneracy(vector<int> &, vector<int>*, int*, int);  // Color degeneracy based upper bound
+    int ub_h_index(vector<int>*, int*);       // H-index based upper bound
+    int ub_color_h_index(vector<int>*, int*); // Color H-index based upper bound
+    int ub_colorful_path(vector<int> &, vector<int>*); // Colorful path based upper bound
+    int ub_colorful_triangle(vector<int> &, vector<int>*); // Colorful triangle based upper bound
   
     // in Graph_baseline.cpp
-    void update_map();      // 更新unordered_edge
+    void update_map();      
     void MaxRFClique();
     void Branch(vector<int>&, vector<int>*, int, vector<int>, int, int);
 
