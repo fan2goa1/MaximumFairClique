@@ -42,7 +42,7 @@ The code structure can be listed as follows.
 
   The specific corresponding relationship of ub_type is as follows.
 
-| ub_type | corresponding upper-bounding technique | Notation in Paper ｜
+| ub_type | corresponding upper-bounding technique | Notation in Paper |
 | ------- | -------------------------------------- | ----------------- |
 | 1       | ub_size                                | $ub_s$            |
 | 2       | ub_color                               | $ub_c$            |
