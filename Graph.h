@@ -76,7 +76,6 @@ class Graph{
     int ub_h_index(vector<int>*, int*);       // H-index based upper bound
     int ub_color_h_index(vector<int>*, int*); // Color H-index based upper bound
     int ub_colorful_path(vector<int> &, vector<int>*); // Colorful path based upper bound
-    int ub_colorful_triangle(vector<int> &, vector<int>*); // Colorful triangle based upper bound
   
     // in Graph_baseline.cpp
     void update_map();      
