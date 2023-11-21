@@ -92,15 +92,6 @@ bool Graph::calc_ub(vector<int> &R, vector<int>* C, int type){
         return false;
     }
     
-    if(type == 11 && ub_colorful_triangle(R, C) <= min_ub){       // ub11
-        for(auto u : R) RCvis[u] = 0;       
-        for(auto u : C[0]) RCvis[u] = 0;
-        for(auto u : C[1]) RCvis[u] = 0;
-        delete[] Sub;
-        delete[] deg_arr;
-        delete[] color_deg_arr;
-        return false;
-    }
     /* recover */
     for(auto u : R) RCvis[u] = 0;       
     for(auto u : C[0]) RCvis[u] = 0;
