@@ -1,4 +1,4 @@
-# Maximum Fair Clique
+# [Efficient Maximum Fair Clique Search over Large Networks](https://arxiv.org/abs/2312.04088)
 
 This is the repository corresponding to the paper "Efficient Maximum Fair Clique Search over Large Networks". This paper proposes a new high-order subgraph model for a binary attribute graph, the Relative Fair Clique, based on the concept of Clique. The purpose of this paper is to find the Maximum Fair Clique in large graphs.
 
@@ -70,3 +70,16 @@ We employ six real-world graphs to evaluate the efficiency of the proposed algor
 
 Among them, Google is a web graph, Aminer and DBLP are collaboration networks, and the remaining datasets are social networks. Aminer is an attributed graph where the attribute indicates the gender of scholars and can be downloaded from [FairLaR](https://github.com/SotirisTsioutsiouliklis/FairLaR/). The other datasets are non-attributed graphs and can be obtained from [networkrepository](networkrepository.com/) and [SNAP](snap.stanford.edu). For these non-attributed graphs,
 we construct attribute graphs by randomly assigning attributes to vertices with approximately equal probability to evaluate the efficiency of all algorithms. Some of the attributed graphs can be found in [this repo](https://github.com/fan2goa1/Attributed_Graph_Data).
+
+## Citation
+```
+@misc{zhang2023efficientmaximumfairclique,
+      title={Efficient Maximum Fair Clique Search over Large Networks}, 
+      author={Qi Zhang and Rong-Hua Li and Zifan Zheng and Hongchao Qin and Ye Yuan and Guoren Wang},
+      year={2023},
+      eprint={2312.04088},
+      archivePrefix={arXiv},
+      primaryClass={cs.DB},
+      url={https://arxiv.org/abs/2312.04088}, 
+}
+```
